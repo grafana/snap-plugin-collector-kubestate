@@ -20,17 +20,20 @@ func (n *Kubestate) CollectMetrics(mts []plugin.Metric) ([]plugin.Metric, error)
 	LogDebug("request to collect metrics", "metric_count", len(mts))
 	metrics := make([]plugin.Metric, 0)
 
-	incluster, err := mts[0].Config.GetBool("incluster")
-	if err != nil {
-		LogError("failed to fetch config value incluster.", "error", err)
-		return nil, err
-	}
+	incluster := true
+	kubeconfigpath := ""
 
-	kubeconfigpath, err := mts[0].Config.GetString("kubeconfigpath")
-	if err != nil {
-		LogError("failed to fetch config value kubeconfigpath.", "error", err)
-		return nil, err
-	}
+	// incluster, err := mts[0].Config.GetBool("incluster")
+	// if err != nil {
+	// 	LogError("failed to fetch config value incluster.", "error", err)
+	// 	incluster = true
+	// }
+
+	// kubeconfigpath, err := mts[0].Config.GetString("kubeconfigpath")
+	// if err != nil {
+	// 	LogError("failed to fetch config value kubeconfigpath.", "error", err)
+	// 	return nil, err
+	// }
 
 	client, err := NewClient(incluster, kubeconfigpath)
 	if err != nil {
@@ -255,7 +258,7 @@ func (n *Kubestate) GetMetricTypes(cfg plugin.Config) ([]plugin.Metric, error) {
 
 func (f *Kubestate) GetConfigPolicy() (plugin.ConfigPolicy, error) {
 	policy := plugin.NewConfigPolicy()
-	policy.AddNewBoolRule([]string{"grafanalabs", "kubestate"}, "incluster", false, plugin.SetDefaultBool(true))
+	policy.AddNewBoolRule([]string{"grafanalabs", "kubestate"}, "incluster", false)
 	policy.AddNewStringRule([]string{"grafanalabs", "kubestate"}, "kubeconfigpath", false)
 	return *policy, nil
 }
