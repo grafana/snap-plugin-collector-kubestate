@@ -5,6 +5,7 @@ import (
 	"strings"
 	"testing"
 
+	"k8s.io/client-go/pkg/api/resource"
 	"k8s.io/client-go/pkg/api/v1"
 
 	"github.com/intelsdi-x/snap-plugin-lib-go/v1/plugin"
@@ -35,6 +36,22 @@ var mockPods = []v1.Pod{
 						Running: &v1.ContainerStateRunning{},
 					},
 					RestartCount: 3,
+				},
+			},
+		},
+		Spec: v1.PodSpec{
+			NodeName: "node1",
+			Containers: []v1.Container{
+				v1.Container{
+					Name: "container1",
+					Resources: v1.ResourceRequirements{
+						Requests: map[v1.ResourceName]resource.Quantity{
+							v1.ResourceCPU: resource.MustParse("100m"),
+						},
+						Limits: map[v1.ResourceName]resource.Quantity{
+							v1.ResourceCPU: resource.MustParse("200m"),
+						},
+					},
 				},
 			},
 		},
@@ -82,16 +99,14 @@ var podStatusMts = []plugin.Metric{
 			AddDynamicElement("namespace", "kubernetes namespace").
 			AddDynamicElement("pod", "pod name").
 			AddStaticElement("status").
-			AddStaticElement("condition").
-			AddStaticElement("ready"),
+			AddStaticElements("condition", "ready"),
 	},
 	plugin.Metric{
 		Namespace: plugin.NewNamespace("grafanalabs", "kubestate", "pod").
 			AddDynamicElement("namespace", "kubernetes namespace").
 			AddDynamicElement("pod", "pod name").
 			AddStaticElement("status").
-			AddStaticElement("condition").
-			AddStaticElement("scheduled"),
+			AddStaticElements("condition", "scheduled"),
 	},
 }
 
@@ -101,40 +116,51 @@ var podContainerMts = []plugin.Metric{
 			AddDynamicElement("namespace", "kubernetes namespace").
 			AddDynamicElement("pod", "pod name").
 			AddDynamicElement("container", "container name").
-			AddStaticElement("status").
-			AddStaticElement("restarts"),
+			AddStaticElements("status", "restarts"),
 	},
 	plugin.Metric{
 		Namespace: plugin.NewNamespace("grafanalabs", "kubestate", "pod", "container").
 			AddDynamicElement("namespace", "kubernetes namespace").
 			AddDynamicElement("pod", "pod name").
 			AddDynamicElement("container", "container name").
-			AddStaticElement("status").
-			AddStaticElement("ready"),
+			AddStaticElements("status", "ready"),
 	},
 	plugin.Metric{
 		Namespace: plugin.NewNamespace("grafanalabs", "kubestate", "pod", "container").
 			AddDynamicElement("namespace", "kubernetes namespace").
 			AddDynamicElement("pod", "pod name").
 			AddDynamicElement("container", "container name").
-			AddStaticElement("status").
-			AddStaticElement("waiting"),
+			AddStaticElements("status", "waiting"),
 	},
 	plugin.Metric{
 		Namespace: plugin.NewNamespace("grafanalabs", "kubestate", "pod", "container").
 			AddDynamicElement("namespace", "kubernetes namespace").
 			AddDynamicElement("pod", "pod name").
 			AddDynamicElement("container", "container name").
-			AddStaticElement("status").
-			AddStaticElement("running"),
+			AddStaticElements("status", "running"),
 	},
 	plugin.Metric{
 		Namespace: plugin.NewNamespace("grafanalabs", "kubestate", "pod", "container").
 			AddDynamicElement("namespace", "kubernetes namespace").
 			AddDynamicElement("pod", "pod name").
 			AddDynamicElement("container", "container name").
-			AddStaticElement("status").
-			AddStaticElement("terminated"),
+			AddStaticElements("status", "terminated"),
+	},
+	plugin.Metric{
+		Namespace: plugin.NewNamespace("grafanalabs", "kubestate", "pod", "container").
+			AddDynamicElement("namespace", "kubernetes namespace").
+			AddDynamicElement("pod", "pod name").
+			AddDynamicElement("container", "container name").
+			AddDynamicElement("node", "node name").
+			AddStaticElements("requested", "cpu", "cores"),
+	},
+	plugin.Metric{
+		Namespace: plugin.NewNamespace("grafanalabs", "kubestate", "pod", "container").
+			AddDynamicElement("namespace", "kubernetes namespace").
+			AddDynamicElement("pod", "pod name").
+			AddDynamicElement("container", "container name").
+			AddDynamicElement("node", "node name").
+			AddStaticElements("limits", "cpu", "cores"),
 	},
 }
 
@@ -161,6 +187,8 @@ var cases = []struct {
 			"grafanalabs.kubestate.pod.container.default.pod1.container1.status.waiting 0",
 			"grafanalabs.kubestate.pod.container.default.pod1.container1.status.running 1",
 			"grafanalabs.kubestate.pod.container.default.pod1.container1.status.terminated 0",
+			"grafanalabs.kubestate.pod.container.default.pod1.container1.node1.requested.cpu.cores 0.1",
+			"grafanalabs.kubestate.pod.container.default.pod1.container1.node1.limits.cpu.cores 0.2",
 		},
 	},
 	{
@@ -177,6 +205,8 @@ var cases = []struct {
 			"grafanalabs.kubestate.pod.container.kube-system.pod2.container2.status.running 0",
 			"grafanalabs.kubestate.pod.container.kube-system.pod2.container1.status.terminated 0",
 			"grafanalabs.kubestate.pod.container.kube-system.pod2.container2.status.terminated 1",
+			// "grafanalabs.kubestate.pod.container.kube-system.pod2.container1.requested.cpu.cores 0",
+			// "grafanalabs.kubestate.pod.container.kube-system.pod2.container2.requested.cpu.cores 1",
 		},
 	},
 }
@@ -197,12 +227,6 @@ func TestPodCollector(t *testing.T) {
 		}
 	})
 }
-
-// func TestKubestate(t *testing.T) {
-// 	Convey("When getting meta data", t, func() {
-
-// 	}
-// }
 
 func format(m *plugin.Metric) string {
 	return fmt.Sprintf("%v %v", strings.Join(m.Namespace.Strings(), "."), m.Data)
