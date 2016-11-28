@@ -88,60 +88,24 @@ func (*podCollector) CollectPod(mts []plugin.Metric, pod v1.Pod) ([]plugin.Metri
 			for _, cs := range pod.Status.ContainerStatuses {
 				switch ns[8] {
 				case "restarts":
-					ns[4] = pod.Namespace
-					ns[5] = pod.Name
-					ns[6] = cs.Name
-					mt.Namespace = plugin.NewNamespace(ns...)
-
-					restartCount := cs.RestartCount
-					mt.Data = restartCount
-
-					mt.Timestamp = time.Now()
-					metrics = append(metrics, mt)
+					metric := createContainerStatusMetric(mt, ns, pod, cs, cs.RestartCount)
+					metrics = append(metrics, metric)
 
 				case "ready":
-					ns[4] = pod.Namespace
-					ns[5] = pod.Name
-					ns[6] = cs.Name
-					mt.Namespace = plugin.NewNamespace(ns...)
-
-					mt.Data = boolInt(cs.Ready)
-
-					mt.Timestamp = time.Now()
-					metrics = append(metrics, mt)
+					metric := createContainerStatusMetric(mt, ns, pod, cs, boolInt(cs.Ready))
+					metrics = append(metrics, metric)
 
 				case "waiting":
-					ns[4] = pod.Namespace
-					ns[5] = pod.Name
-					ns[6] = cs.Name
-					mt.Namespace = plugin.NewNamespace(ns...)
-
-					mt.Data = boolInt(cs.State.Waiting != nil)
-
-					mt.Timestamp = time.Now()
-					metrics = append(metrics, mt)
+					metric := createContainerStatusMetric(mt, ns, pod, cs, boolInt(cs.State.Waiting != nil))
+					metrics = append(metrics, metric)
 
 				case "running":
-					ns[4] = pod.Namespace
-					ns[5] = pod.Name
-					ns[6] = cs.Name
-					mt.Namespace = plugin.NewNamespace(ns...)
-
-					mt.Data = boolInt(cs.State.Running != nil)
-
-					mt.Timestamp = time.Now()
-					metrics = append(metrics, mt)
+					metric := createContainerStatusMetric(mt, ns, pod, cs, boolInt(cs.State.Running != nil))
+					metrics = append(metrics, metric)
 
 				case "terminated":
-					ns[4] = pod.Namespace
-					ns[5] = pod.Name
-					ns[6] = cs.Name
-					mt.Namespace = plugin.NewNamespace(ns...)
-
-					mt.Data = boolInt(cs.State.Terminated != nil)
-
-					mt.Timestamp = time.Now()
-					metrics = append(metrics, mt)
+					metric := createContainerStatusMetric(mt, ns, pod, cs, boolInt(cs.State.Terminated != nil))
+					metrics = append(metrics, metric)
 				}
 			}
 
@@ -151,31 +115,15 @@ func (*podCollector) CollectPod(mts []plugin.Metric, pod v1.Pod) ([]plugin.Metri
 					req := c.Resources.Requests
 
 					if cpu, ok := req[v1.ResourceCPU]; ok {
-						ns[4] = pod.Namespace
-						ns[5] = pod.Name
-						ns[6] = c.Name
-						ns[7] = nodeName
-						mt.Namespace = plugin.NewNamespace(ns...)
-
-						mt.Data = float64(cpu.MilliValue()) / 1000
-
-						mt.Timestamp = time.Now()
-						metrics = append(metrics, mt)
+						metric := createContainerResourcesMetric(mt, ns, pod, c, nodeName, float64(cpu.MilliValue())/1000)
+						metrics = append(metrics, metric)
 					}
 				} else if ns[8] == "limits" {
 					limits := c.Resources.Limits
 
 					if cpu, ok := limits[v1.ResourceCPU]; ok {
-						ns[4] = pod.Namespace
-						ns[5] = pod.Name
-						ns[6] = c.Name
-						ns[7] = nodeName
-						mt.Namespace = plugin.NewNamespace(ns...)
-
-						mt.Data = float64(cpu.MilliValue()) / 1000
-
-						mt.Timestamp = time.Now()
-						metrics = append(metrics, mt)
+						metric := createContainerResourcesMetric(mt, ns, pod, c, nodeName, float64(cpu.MilliValue())/1000)
+						metrics = append(metrics, metric)
 					}
 				}
 			}
@@ -183,6 +131,31 @@ func (*podCollector) CollectPod(mts []plugin.Metric, pod v1.Pod) ([]plugin.Metri
 	}
 
 	return metrics, nil
+}
+
+func createContainerStatusMetric(mt plugin.Metric, ns []string, pod v1.Pod, cs v1.ContainerStatus, value interface{}) plugin.Metric {
+	ns[4] = pod.Namespace
+	ns[5] = pod.Name
+	ns[6] = cs.Name
+	mt.Namespace = plugin.NewNamespace(ns...)
+
+	mt.Data = value
+
+	mt.Timestamp = time.Now()
+	return mt
+}
+
+func createContainerResourcesMetric(mt plugin.Metric, ns []string, pod v1.Pod, c v1.Container, nodeName string, value interface{}) plugin.Metric {
+	ns[4] = pod.Namespace
+	ns[5] = pod.Name
+	ns[6] = c.Name
+	ns[7] = nodeName
+	mt.Namespace = plugin.NewNamespace(ns...)
+
+	mt.Data = value
+
+	mt.Timestamp = time.Now()
+	return mt
 }
 
 func getPodCondition(conditions []v1.PodCondition, t v1.PodConditionType) bool {
