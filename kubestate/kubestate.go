@@ -111,18 +111,38 @@ func (*podCollector) CollectPod(mts []plugin.Metric, pod v1.Pod) ([]plugin.Metri
 
 			nodeName := pod.Spec.NodeName
 			for _, c := range pod.Spec.Containers {
-				if ns[8] == "requested" {
+				if ns[8] == "requested" && ns[9] == "cpu" {
 					req := c.Resources.Requests
 
 					if cpu, ok := req[v1.ResourceCPU]; ok {
 						metric := createContainerResourcesMetric(mt, ns, pod, c, nodeName, float64(cpu.MilliValue())/1000)
 						metrics = append(metrics, metric)
 					}
-				} else if ns[8] == "limits" {
+				} else if ns[8] == "requested" && ns[9] == "memory" {
+					req := c.Resources.Requests
+
+					if mem, ok := req[v1.ResourceMemory]; ok {
+						metric := createContainerResourcesMetric(mt, ns, pod, c, nodeName, float64(mem.Value()))
+						metrics = append(metrics, metric)
+					}
+				} else if ns[8] == "limits" && ns[9] == "cpu" {
 					limits := c.Resources.Limits
 
 					if cpu, ok := limits[v1.ResourceCPU]; ok {
 						metric := createContainerResourcesMetric(mt, ns, pod, c, nodeName, float64(cpu.MilliValue())/1000)
+						metrics = append(metrics, metric)
+					} else if cpu, ok := limits[v1.ResourceLimitsCPU]; ok {
+						metric := createContainerResourcesMetric(mt, ns, pod, c, nodeName, float64(cpu.MilliValue())/1000)
+						metrics = append(metrics, metric)
+					}
+				} else if ns[8] == "limits" && ns[9] == "memory" {
+					limits := c.Resources.Limits
+
+					if mem, ok := limits[v1.ResourceMemory]; ok {
+						metric := createContainerResourcesMetric(mt, ns, pod, c, nodeName, float64(mem.Value()))
+						metrics = append(metrics, metric)
+					} else if mem, ok := limits[v1.ResourceLimitsMemory]; ok {
+						metric := createContainerResourcesMetric(mt, ns, pod, c, nodeName, float64(mem.Value()))
 						metrics = append(metrics, metric)
 					}
 				}
@@ -270,7 +290,27 @@ func (n *Kubestate) GetMetricTypes(cfg plugin.Config) ([]plugin.Metric, error) {
 			AddDynamicElement("pod", "pod name").
 			AddDynamicElement("container", "container name").
 			AddDynamicElement("node", "node name").
+			AddStaticElements("requested", "memory", "bytes"),
+		Version: 1,
+	})
+
+	mts = append(mts, plugin.Metric{
+		Namespace: plugin.NewNamespace("grafanalabs", "kubestate", "pod", "container").
+			AddDynamicElement("namespace", "kubernetes namespace").
+			AddDynamicElement("pod", "pod name").
+			AddDynamicElement("container", "container name").
+			AddDynamicElement("node", "node name").
 			AddStaticElements("limits", "cpu", "cores"),
+		Version: 1,
+	})
+
+	mts = append(mts, plugin.Metric{
+		Namespace: plugin.NewNamespace("grafanalabs", "kubestate", "pod", "container").
+			AddDynamicElement("namespace", "kubernetes namespace").
+			AddDynamicElement("pod", "pod name").
+			AddDynamicElement("container", "container name").
+			AddDynamicElement("node", "node name").
+			AddStaticElements("limits", "memory", "bytes"),
 		Version: 1,
 	})
 

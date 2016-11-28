@@ -46,10 +46,12 @@ var mockPods = []v1.Pod{
 					Name: "container1",
 					Resources: v1.ResourceRequirements{
 						Requests: map[v1.ResourceName]resource.Quantity{
-							v1.ResourceCPU: resource.MustParse("100m"),
+							v1.ResourceCPU:    resource.MustParse("100m"),
+							v1.ResourceMemory: resource.MustParse("100M"),
 						},
 						Limits: map[v1.ResourceName]resource.Quantity{
-							v1.ResourceCPU: resource.MustParse("200m"),
+							v1.ResourceCPU:    resource.MustParse("200m"),
+							v1.ResourceMemory: resource.MustParse("200M"),
 						},
 					},
 				},
@@ -79,6 +81,29 @@ var mockPods = []v1.Pod{
 						Terminated: &v1.ContainerStateTerminated{},
 					},
 					RestartCount: 5,
+				},
+			},
+		},
+		Spec: v1.PodSpec{
+			NodeName: "node1",
+			Containers: []v1.Container{
+				v1.Container{
+					Name: "container1",
+					Resources: v1.ResourceRequirements{
+						Limits: map[v1.ResourceName]resource.Quantity{
+							v1.ResourceLimitsCPU:    resource.MustParse("200m"),
+							v1.ResourceLimitsMemory: resource.MustParse("200M"),
+						},
+					},
+				},
+				v1.Container{
+					Name: "container2",
+					Resources: v1.ResourceRequirements{
+						Limits: map[v1.ResourceName]resource.Quantity{
+							v1.ResourceLimitsCPU:    resource.MustParse("200m"),
+							v1.ResourceLimitsMemory: resource.MustParse("200M"),
+						},
+					},
 				},
 			},
 		},
@@ -160,7 +185,23 @@ var podContainerMts = []plugin.Metric{
 			AddDynamicElement("pod", "pod name").
 			AddDynamicElement("container", "container name").
 			AddDynamicElement("node", "node name").
+			AddStaticElements("requested", "memory", "bytes"),
+	},
+	plugin.Metric{
+		Namespace: plugin.NewNamespace("grafanalabs", "kubestate", "pod", "container").
+			AddDynamicElement("namespace", "kubernetes namespace").
+			AddDynamicElement("pod", "pod name").
+			AddDynamicElement("container", "container name").
+			AddDynamicElement("node", "node name").
 			AddStaticElements("limits", "cpu", "cores"),
+	},
+	plugin.Metric{
+		Namespace: plugin.NewNamespace("grafanalabs", "kubestate", "pod", "container").
+			AddDynamicElement("namespace", "kubernetes namespace").
+			AddDynamicElement("pod", "pod name").
+			AddDynamicElement("container", "container name").
+			AddDynamicElement("node", "node name").
+			AddStaticElements("limits", "memory", "bytes"),
 	},
 }
 
@@ -188,7 +229,9 @@ var cases = []struct {
 			"grafanalabs.kubestate.pod.container.default.pod1.container1.status.running 1",
 			"grafanalabs.kubestate.pod.container.default.pod1.container1.status.terminated 0",
 			"grafanalabs.kubestate.pod.container.default.pod1.container1.node1.requested.cpu.cores 0.1",
+			"grafanalabs.kubestate.pod.container.default.pod1.container1.node1.requested.memory.bytes 1e+08",
 			"grafanalabs.kubestate.pod.container.default.pod1.container1.node1.limits.cpu.cores 0.2",
+			"grafanalabs.kubestate.pod.container.default.pod1.container1.node1.limits.memory.bytes 2e+08",
 		},
 	},
 	{
@@ -205,8 +248,10 @@ var cases = []struct {
 			"grafanalabs.kubestate.pod.container.kube-system.pod2.container2.status.running 0",
 			"grafanalabs.kubestate.pod.container.kube-system.pod2.container1.status.terminated 0",
 			"grafanalabs.kubestate.pod.container.kube-system.pod2.container2.status.terminated 1",
-			// "grafanalabs.kubestate.pod.container.kube-system.pod2.container1.requested.cpu.cores 0",
-			// "grafanalabs.kubestate.pod.container.kube-system.pod2.container2.requested.cpu.cores 1",
+			"grafanalabs.kubestate.pod.container.kube-system.pod2.container1.node1.limits.cpu.cores 0.2",
+			"grafanalabs.kubestate.pod.container.kube-system.pod2.container2.node1.limits.cpu.cores 0.2",
+			"grafanalabs.kubestate.pod.container.kube-system.pod2.container1.node1.limits.memory.bytes 2e+08",
+			"grafanalabs.kubestate.pod.container.kube-system.pod2.container2.node1.limits.memory.bytes 2e+08",
 		},
 	},
 }
