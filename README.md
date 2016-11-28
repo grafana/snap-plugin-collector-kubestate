@@ -56,16 +56,34 @@ There are a number of other resources you can review to learn to use this plugin
 ### Collected Metrics
 This plugin has the ability to gather the following metrics:
 
+#### Pods
+
 Namespace | Description (optional)
 ----------|-----------------------
 /grafanalabs/kubestate/pod/[NAMESPACE]/[POD]/status/condition/ready | specifies if the pod is ready to serve requests
 /grafanalabs/kubestate/pod/[NAMESPACE]/[POD]/status/condition/scheduled | status of the scheduling process for the pod
 /grafanalabs/kubestate/pod/[NAMESPACE]/[POD]/status/phase/[PHASE]/value | Phase can be Pending, Running, Succeeded, Failed, Unknown
+/grafanalabs/kubestate/pod/container/[NAMESPACE]/[POD]/[CONTAINER]/[NODE]/limits/cpu/cores | The limit on cpu cores to be used by a container.
+/grafanalabs/kubestate/pod/container/[NAMESPACE]/[POD]/[CONTAINER]/[NODE]/limits/memory/bytes | The limit on memory to be used by a container in bytes.
+/grafanalabs/kubestate/pod/container/[NAMESPACE]/[POD]/[CONTAINER]/[NODE]/requested/cpu/cores | The number of requested cpu cores by a container.
+/grafanalabs/kubestate/pod/container/[NAMESPACE]/[POD]/[CONTAINER]/[NODE]/requested/memory/bytes | The number of requested memory bytes by a container.
 /grafanalabs/kubestate/pod/container/[NAMESPACE]/[POD]/[CONTAINER]/status/ready | specifies whether the container has passed its readiness probe
 /grafanalabs/kubestate/pod/container/[NAMESPACE]/[POD]/[CONTAINER]/status/restarts | number of times the container has been restarted
 /grafanalabs/kubestate/pod/container/[NAMESPACE]/[POD]/[CONTAINER]/status/running | value 1 if container is running else value 0
 /grafanalabs/kubestate/pod/container/[NAMESPACE]/[POD]/[CONTAINER]/status/terminated | value 1 if container is terminated else value 0
 /grafanalabs/kubestate/pod/container/[NAMESPACE]/[POD]/[CONTAINER]/status/waiting | value 1 if container is waiting else value 0
+
+#### Nodes
+
+Namespace | Description (optional)
+----------|-----------------------
+/grafanalabs/kubestate/node/[NAMESPACE]/[NODE]/spec/unschedulable | Whether a node can schedule new pods.
+/grafanalabs/kubestate/node/[NAMESPACE]/[NODE]/status/allocatable/cpu/cores | The CPU resources of a node that are available for scheduling.
+/grafanalabs/kubestate/node/[NAMESPACE]/[NODE]/status/allocatable/memory/bytes | The memory resources of a node that are available for scheduling.
+/grafanalabs/kubestate/node/[NAMESPACE]/[NODE]/status/allocatable/pods | The pod resources of a node that are available for scheduling.
+/grafanalabs/kubestate/node/[NAMESPACE]/[NODE]/status/capacity/cpu/cores | The total CPU resources of the node.
+/grafanalabs/kubestate/node/[NAMESPACE]/[NODE]/status/capacity/memory/bytes | The total memory resources of the node.
+/grafanalabs/kubestate/node/[NAMESPACE]/[NODE]/status/capacity/pods | The total pod resources of the node.
 
 
 ### Examples

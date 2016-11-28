@@ -40,7 +40,7 @@ var mockPods = []v1.Pod{
 			},
 		},
 		Spec: v1.PodSpec{
-			NodeName: "node1",
+			NodeName: "127.0.0.1",
 			Containers: []v1.Container{
 				v1.Container{
 					Name: "container1",
@@ -228,10 +228,10 @@ var cases = []struct {
 			"grafanalabs.kubestate.pod.container.default.pod1.container1.status.waiting 0",
 			"grafanalabs.kubestate.pod.container.default.pod1.container1.status.running 1",
 			"grafanalabs.kubestate.pod.container.default.pod1.container1.status.terminated 0",
-			"grafanalabs.kubestate.pod.container.default.pod1.container1.node1.requested.cpu.cores 0.1",
-			"grafanalabs.kubestate.pod.container.default.pod1.container1.node1.requested.memory.bytes 1e+08",
-			"grafanalabs.kubestate.pod.container.default.pod1.container1.node1.limits.cpu.cores 0.2",
-			"grafanalabs.kubestate.pod.container.default.pod1.container1.node1.limits.memory.bytes 2e+08",
+			"grafanalabs.kubestate.pod.container.default.pod1.container1.127_0_0_1.requested.cpu.cores 0.1",
+			"grafanalabs.kubestate.pod.container.default.pod1.container1.127_0_0_1.requested.memory.bytes 1e+08",
+			"grafanalabs.kubestate.pod.container.default.pod1.container1.127_0_0_1.limits.cpu.cores 0.2",
+			"grafanalabs.kubestate.pod.container.default.pod1.container1.127_0_0_1.limits.memory.bytes 2e+08",
 		},
 	},
 	{

@@ -1,6 +1,8 @@
 package kubestate
 
 import (
+	"strings"
+
 	"github.com/intelsdi-x/snap-plugin-lib-go/v1/plugin"
 	. "github.com/intelsdi-x/snap-plugin-utilities/logger"
 	// "k8s.io/client-go/rest"
@@ -52,6 +54,10 @@ func boolInt(b bool) int {
 	}
 
 	return 0
+}
+
+func slugify(name string) string {
+	return strings.Replace(name, ".", "_", -1)
 }
 
 func (n *Kubestate) GetMetricTypes(cfg plugin.Config) ([]plugin.Metric, error) {
@@ -169,6 +175,63 @@ func (n *Kubestate) GetMetricTypes(cfg plugin.Config) ([]plugin.Metric, error) {
 			AddDynamicElement("container", "container name").
 			AddDynamicElement("node", "node name").
 			AddStaticElements("limits", "memory", "bytes"),
+		Version: 1,
+	})
+
+	//Node metrics
+	mts = append(mts, plugin.Metric{
+		Namespace: plugin.NewNamespace("grafanalabs", "kubestate", "node").
+			AddDynamicElement("namespace", "kubernetes namespace").
+			AddDynamicElement("node", "node name").
+			AddStaticElements("spec", "unschedulable"),
+		Version: 1,
+	})
+
+	mts = append(mts, plugin.Metric{
+		Namespace: plugin.NewNamespace("grafanalabs", "kubestate", "node").
+			AddDynamicElement("namespace", "kubernetes namespace").
+			AddDynamicElement("node", "node name").
+			AddStaticElements("status", "capacity", "cpu", "cores"),
+		Version: 1,
+	})
+
+	mts = append(mts, plugin.Metric{
+		Namespace: plugin.NewNamespace("grafanalabs", "kubestate", "node").
+			AddDynamicElement("namespace", "kubernetes namespace").
+			AddDynamicElement("node", "node name").
+			AddStaticElements("status", "capacity", "memory", "bytes"),
+		Version: 1,
+	})
+
+	mts = append(mts, plugin.Metric{
+		Namespace: plugin.NewNamespace("grafanalabs", "kubestate", "node").
+			AddDynamicElement("namespace", "kubernetes namespace").
+			AddDynamicElement("node", "node name").
+			AddStaticElements("status", "capacity", "pods"),
+		Version: 1,
+	})
+
+	mts = append(mts, plugin.Metric{
+		Namespace: plugin.NewNamespace("grafanalabs", "kubestate", "node").
+			AddDynamicElement("namespace", "kubernetes namespace").
+			AddDynamicElement("node", "node name").
+			AddStaticElements("status", "allocatable", "cpu", "cores"),
+		Version: 1,
+	})
+
+	mts = append(mts, plugin.Metric{
+		Namespace: plugin.NewNamespace("grafanalabs", "kubestate", "node").
+			AddDynamicElement("namespace", "kubernetes namespace").
+			AddDynamicElement("node", "node name").
+			AddStaticElements("status", "allocatable", "memory", "bytes"),
+		Version: 1,
+	})
+
+	mts = append(mts, plugin.Metric{
+		Namespace: plugin.NewNamespace("grafanalabs", "kubestate", "node").
+			AddDynamicElement("namespace", "kubernetes namespace").
+			AddDynamicElement("node", "node name").
+			AddStaticElements("status", "allocatable", "pods"),
 		Version: 1,
 	})
 

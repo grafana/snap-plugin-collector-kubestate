@@ -127,7 +127,7 @@ func createContainerResourcesMetric(mt plugin.Metric, ns []string, pod v1.Pod, c
 	ns[4] = pod.Namespace
 	ns[5] = pod.Name
 	ns[6] = c.Name
-	ns[7] = nodeName
+	ns[7] = slugify(nodeName)
 	mt.Namespace = plugin.NewNamespace(ns...)
 
 	mt.Data = value
