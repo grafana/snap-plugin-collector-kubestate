@@ -10,7 +10,7 @@ import (
 type podCollector struct {
 }
 
-func (*podCollector) CollectPod(mts []plugin.Metric, pod v1.Pod) ([]plugin.Metric, error) {
+func (*podCollector) Collect(mts []plugin.Metric, pod v1.Pod) ([]plugin.Metric, error) {
 	metrics := make([]plugin.Metric, 0)
 
 	for _, mt := range mts {
@@ -125,9 +125,9 @@ func createContainerStatusMetric(mt plugin.Metric, ns []string, pod v1.Pod, cs v
 
 func createContainerResourcesMetric(mt plugin.Metric, ns []string, pod v1.Pod, c v1.Container, nodeName string, value interface{}) plugin.Metric {
 	ns[4] = pod.Namespace
-	ns[5] = pod.Name
-	ns[6] = c.Name
-	ns[7] = slugify(nodeName)
+	ns[5] = slugify(nodeName)
+	ns[6] = pod.Name
+	ns[7] = c.Name
 	mt.Namespace = plugin.NewNamespace(ns...)
 
 	mt.Data = value

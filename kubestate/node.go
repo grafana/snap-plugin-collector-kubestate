@@ -10,7 +10,7 @@ import (
 type nodeCollector struct {
 }
 
-func (*nodeCollector) CollectNode(mts []plugin.Metric, node v1.Node) ([]plugin.Metric, error) {
+func (*nodeCollector) Collect(mts []plugin.Metric, node v1.Node) ([]plugin.Metric, error) {
 	metrics := make([]plugin.Metric, 0)
 
 	for _, mt := range mts {
@@ -18,6 +18,9 @@ func (*nodeCollector) CollectNode(mts []plugin.Metric, node v1.Node) ([]plugin.M
 
 		if ns[5] == "spec" && ns[6] == "unschedulable" {
 			metric := createNodeMetric(mt, ns, node, boolInt(node.Spec.Unschedulable))
+			metrics = append(metrics, metric)
+		} else if ns[6] == "outofdisk" {
+			metric := createNodeMetric(mt, ns, node, boolInt(getNodeCondition(node.Status.Conditions, v1.NodeOutOfDisk)))
 			metrics = append(metrics, metric)
 		} else if ns[6] == "capacity" && ns[7] == "cpu" {
 			if cpu, ok := node.Status.Capacity[v1.ResourceCPU]; ok {
@@ -64,4 +67,14 @@ func createNodeMetric(mt plugin.Metric, ns []string, node v1.Node, value interfa
 
 	mt.Timestamp = time.Now()
 	return mt
+}
+
+func getNodeCondition(conditions []v1.NodeCondition, t v1.NodeConditionType) bool {
+	for _, c := range conditions {
+		if c.Type == t && c.Status == v1.ConditionTrue {
+			return true
+		}
+	}
+
+	return false
 }

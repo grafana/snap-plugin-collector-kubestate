@@ -20,13 +20,6 @@ var mockNodes = []v1.Node{
 			Unschedulable: true,
 		},
 		Status: v1.NodeStatus{
-			NodeInfo: v1.NodeSystemInfo{
-				KernelVersion:           "kernel",
-				KubeletVersion:          "kubelet",
-				KubeProxyVersion:        "kubeproxy",
-				OSImage:                 "osimage",
-				ContainerRuntimeVersion: "rkt",
-			},
 			Capacity: v1.ResourceList{
 				v1.ResourceCPU:    resource.MustParse("4.3"),
 				v1.ResourceMemory: resource.MustParse("2G"),
@@ -37,52 +30,10 @@ var mockNodes = []v1.Node{
 				v1.ResourceMemory: resource.MustParse("1G"),
 				v1.ResourcePods:   resource.MustParse("555"),
 			},
+			Conditions: []v1.NodeCondition{
+				{Type: v1.NodeOutOfDisk, Status: v1.ConditionFalse},
+			},
 		},
-	},
-}
-
-var nodeStatusMts = []plugin.Metric{
-	plugin.Metric{
-		Namespace: plugin.NewNamespace("grafanalabs", "kubestate", "node").
-			AddDynamicElement("namespace", "kubernetes namespace").
-			AddDynamicElement("node", "node name").
-			AddStaticElements("spec", "unschedulable"),
-	},
-	plugin.Metric{
-		Namespace: plugin.NewNamespace("grafanalabs", "kubestate", "node").
-			AddDynamicElement("namespace", "kubernetes namespace").
-			AddDynamicElement("node", "node name").
-			AddStaticElements("status", "capacity", "cpu", "cores"),
-	},
-	plugin.Metric{
-		Namespace: plugin.NewNamespace("grafanalabs", "kubestate", "node").
-			AddDynamicElement("namespace", "kubernetes namespace").
-			AddDynamicElement("node", "node name").
-			AddStaticElements("status", "capacity", "memory", "bytes"),
-	},
-	plugin.Metric{
-		Namespace: plugin.NewNamespace("grafanalabs", "kubestate", "node").
-			AddDynamicElement("namespace", "kubernetes namespace").
-			AddDynamicElement("node", "node name").
-			AddStaticElements("status", "capacity", "pods"),
-	},
-	plugin.Metric{
-		Namespace: plugin.NewNamespace("grafanalabs", "kubestate", "node").
-			AddDynamicElement("namespace", "kubernetes namespace").
-			AddDynamicElement("node", "node name").
-			AddStaticElements("status", "allocatable", "cpu", "cores"),
-	},
-	plugin.Metric{
-		Namespace: plugin.NewNamespace("grafanalabs", "kubestate", "node").
-			AddDynamicElement("namespace", "kubernetes namespace").
-			AddDynamicElement("node", "node name").
-			AddStaticElements("status", "allocatable", "memory", "bytes"),
-	},
-	plugin.Metric{
-		Namespace: plugin.NewNamespace("grafanalabs", "kubestate", "node").
-			AddDynamicElement("namespace", "kubernetes namespace").
-			AddDynamicElement("node", "node name").
-			AddStaticElements("status", "allocatable", "pods"),
 	},
 }
 
@@ -93,9 +44,10 @@ var nodeCases = []struct {
 }{
 	{
 		node:    mockNodes[0],
-		metrics: nodeStatusMts,
+		metrics: getNodeMetricTypes(),
 		expected: []string{
 			"grafanalabs.kubestate.node.default.127_0_0_1.spec.unschedulable 1",
+			"grafanalabs.kubestate.node.default.127_0_0_1.status.outofdisk 0",
 			"grafanalabs.kubestate.node.default.127_0_0_1.status.capacity.cpu.cores 4.3",
 			"grafanalabs.kubestate.node.default.127_0_0_1.status.capacity.memory.bytes 2e+09",
 			"grafanalabs.kubestate.node.default.127_0_0_1.status.capacity.pods 1000",
@@ -109,7 +61,7 @@ var nodeCases = []struct {
 func TestNodeCollector(t *testing.T) {
 	Convey("When collecting metrics for nodes", t, func() {
 		for _, c := range nodeCases {
-			metrics, err := new(nodeCollector).CollectNode(c.metrics, c.node)
+			metrics, err := new(nodeCollector).Collect(c.metrics, c.node)
 			So(err, ShouldBeNil)
 			So(metrics, ShouldNotBeNil)
 

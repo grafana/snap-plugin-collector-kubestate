@@ -51,3 +51,7 @@ func NewClient(incluster bool, kubeconfigpath string) (*Client, error) {
 func (c *Client) GetPods() (*v1.PodList, error) {
 	return c.clientset.Core().Pods("").List(v1.ListOptions{})
 }
+
+func (c *Client) GetNodes() (*v1.NodeList, error) {
+	return c.clientset.Core().Nodes().List(v1.ListOptions{})
+}

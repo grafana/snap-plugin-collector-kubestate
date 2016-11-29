@@ -40,8 +40,15 @@ func (n *Kubestate) CollectMetrics(mts []plugin.Metric) ([]plugin.Metric, error)
 	pods, err := client.GetPods()
 	podCollector := new(podCollector)
 	for _, p := range pods.Items {
-		podMetrics, _ := podCollector.CollectPod(mts, p)
+		podMetrics, _ := podCollector.Collect(mts, p)
 		metrics = append(metrics, podMetrics...)
+	}
+
+	nodes, err := client.GetNodes()
+	nodeCollector := new(nodeCollector)
+	for _, n := range nodes.Items {
+		nodeMetrics, _ := nodeCollector.Collect(mts, n)
+		metrics = append(metrics, nodeMetrics...)
 	}
 
 	LogDebug("collecting metrics completed", "metric_count", len(metrics))
@@ -60,9 +67,8 @@ func slugify(name string) string {
 	return strings.Replace(name, ".", "_", -1)
 }
 
-func (n *Kubestate) GetMetricTypes(cfg plugin.Config) ([]plugin.Metric, error) {
+func getPodMetricTypes() []plugin.Metric {
 	mts := []plugin.Metric{}
-
 	// Pod metrics
 	mts = append(mts, plugin.Metric{
 		Namespace: plugin.NewNamespace("grafanalabs", "kubestate", "pod").
@@ -92,6 +98,11 @@ func (n *Kubestate) GetMetricTypes(cfg plugin.Config) ([]plugin.Metric, error) {
 		Version: 1,
 	})
 
+	return mts
+}
+
+func getPodContainerMetricTypes() []plugin.Metric {
+	mts := []plugin.Metric{}
 	// Pod Container metrics
 	mts = append(mts, plugin.Metric{
 		Namespace: plugin.NewNamespace("grafanalabs", "kubestate", "pod", "container").
@@ -141,9 +152,9 @@ func (n *Kubestate) GetMetricTypes(cfg plugin.Config) ([]plugin.Metric, error) {
 	mts = append(mts, plugin.Metric{
 		Namespace: plugin.NewNamespace("grafanalabs", "kubestate", "pod", "container").
 			AddDynamicElement("namespace", "kubernetes namespace").
+			AddDynamicElement("node", "node name").
 			AddDynamicElement("pod", "pod name").
 			AddDynamicElement("container", "container name").
-			AddDynamicElement("node", "node name").
 			AddStaticElements("requested", "cpu", "cores"),
 		Version: 1,
 	})
@@ -151,9 +162,9 @@ func (n *Kubestate) GetMetricTypes(cfg plugin.Config) ([]plugin.Metric, error) {
 	mts = append(mts, plugin.Metric{
 		Namespace: plugin.NewNamespace("grafanalabs", "kubestate", "pod", "container").
 			AddDynamicElement("namespace", "kubernetes namespace").
+			AddDynamicElement("node", "node name").
 			AddDynamicElement("pod", "pod name").
 			AddDynamicElement("container", "container name").
-			AddDynamicElement("node", "node name").
 			AddStaticElements("requested", "memory", "bytes"),
 		Version: 1,
 	})
@@ -161,9 +172,9 @@ func (n *Kubestate) GetMetricTypes(cfg plugin.Config) ([]plugin.Metric, error) {
 	mts = append(mts, plugin.Metric{
 		Namespace: plugin.NewNamespace("grafanalabs", "kubestate", "pod", "container").
 			AddDynamicElement("namespace", "kubernetes namespace").
+			AddDynamicElement("node", "node name").
 			AddDynamicElement("pod", "pod name").
 			AddDynamicElement("container", "container name").
-			AddDynamicElement("node", "node name").
 			AddStaticElements("limits", "cpu", "cores"),
 		Version: 1,
 	})
@@ -171,12 +182,18 @@ func (n *Kubestate) GetMetricTypes(cfg plugin.Config) ([]plugin.Metric, error) {
 	mts = append(mts, plugin.Metric{
 		Namespace: plugin.NewNamespace("grafanalabs", "kubestate", "pod", "container").
 			AddDynamicElement("namespace", "kubernetes namespace").
+			AddDynamicElement("node", "node name").
 			AddDynamicElement("pod", "pod name").
 			AddDynamicElement("container", "container name").
-			AddDynamicElement("node", "node name").
 			AddStaticElements("limits", "memory", "bytes"),
 		Version: 1,
 	})
+
+	return mts
+}
+
+func getNodeMetricTypes() []plugin.Metric {
+	mts := []plugin.Metric{}
 
 	//Node metrics
 	mts = append(mts, plugin.Metric{
@@ -184,6 +201,14 @@ func (n *Kubestate) GetMetricTypes(cfg plugin.Config) ([]plugin.Metric, error) {
 			AddDynamicElement("namespace", "kubernetes namespace").
 			AddDynamicElement("node", "node name").
 			AddStaticElements("spec", "unschedulable"),
+		Version: 1,
+	})
+
+	mts = append(mts, plugin.Metric{
+		Namespace: plugin.NewNamespace("grafanalabs", "kubestate", "node").
+			AddDynamicElement("namespace", "kubernetes namespace").
+			AddDynamicElement("node", "node name").
+			AddStaticElements("status", "outofdisk"),
 		Version: 1,
 	})
 
@@ -234,6 +259,16 @@ func (n *Kubestate) GetMetricTypes(cfg plugin.Config) ([]plugin.Metric, error) {
 			AddStaticElements("status", "allocatable", "pods"),
 		Version: 1,
 	})
+
+	return mts
+}
+
+func (n *Kubestate) GetMetricTypes(cfg plugin.Config) ([]plugin.Metric, error) {
+	mts := []plugin.Metric{}
+
+	mts = append(mts, getPodMetricTypes()...)
+	mts = append(mts, getPodContainerMetricTypes()...)
+	mts = append(mts, getNodeMetricTypes()...)
 
 	return mts, nil
 }

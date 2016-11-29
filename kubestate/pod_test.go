@@ -112,101 +112,6 @@ var mockPods = []v1.Pod{
 	},
 }
 
-var podStatusMts = []plugin.Metric{
-	plugin.Metric{
-		Namespace: plugin.NewNamespace("grafanalabs", "kubestate", "pod").
-			AddDynamicElement("namespace", "kubernetes namespace").
-			AddDynamicElement("pod", "pod name").
-			AddStaticElements("status", "phase").
-			AddDynamicElement("phase", "current phase").
-			AddStaticElement("value"),
-	},
-	plugin.Metric{
-		Namespace: plugin.NewNamespace("grafanalabs", "kubestate", "pod").
-			AddDynamicElement("namespace", "kubernetes namespace").
-			AddDynamicElement("pod", "pod name").
-			AddStaticElement("status").
-			AddStaticElements("condition", "ready"),
-	},
-	plugin.Metric{
-		Namespace: plugin.NewNamespace("grafanalabs", "kubestate", "pod").
-			AddDynamicElement("namespace", "kubernetes namespace").
-			AddDynamicElement("pod", "pod name").
-			AddStaticElement("status").
-			AddStaticElements("condition", "scheduled"),
-	},
-}
-
-var podContainerMts = []plugin.Metric{
-	plugin.Metric{
-		Namespace: plugin.NewNamespace("grafanalabs", "kubestate", "pod", "container").
-			AddDynamicElement("namespace", "kubernetes namespace").
-			AddDynamicElement("pod", "pod name").
-			AddDynamicElement("container", "container name").
-			AddStaticElements("status", "restarts"),
-	},
-	plugin.Metric{
-		Namespace: plugin.NewNamespace("grafanalabs", "kubestate", "pod", "container").
-			AddDynamicElement("namespace", "kubernetes namespace").
-			AddDynamicElement("pod", "pod name").
-			AddDynamicElement("container", "container name").
-			AddStaticElements("status", "ready"),
-	},
-	plugin.Metric{
-		Namespace: plugin.NewNamespace("grafanalabs", "kubestate", "pod", "container").
-			AddDynamicElement("namespace", "kubernetes namespace").
-			AddDynamicElement("pod", "pod name").
-			AddDynamicElement("container", "container name").
-			AddStaticElements("status", "waiting"),
-	},
-	plugin.Metric{
-		Namespace: plugin.NewNamespace("grafanalabs", "kubestate", "pod", "container").
-			AddDynamicElement("namespace", "kubernetes namespace").
-			AddDynamicElement("pod", "pod name").
-			AddDynamicElement("container", "container name").
-			AddStaticElements("status", "running"),
-	},
-	plugin.Metric{
-		Namespace: plugin.NewNamespace("grafanalabs", "kubestate", "pod", "container").
-			AddDynamicElement("namespace", "kubernetes namespace").
-			AddDynamicElement("pod", "pod name").
-			AddDynamicElement("container", "container name").
-			AddStaticElements("status", "terminated"),
-	},
-	plugin.Metric{
-		Namespace: plugin.NewNamespace("grafanalabs", "kubestate", "pod", "container").
-			AddDynamicElement("namespace", "kubernetes namespace").
-			AddDynamicElement("pod", "pod name").
-			AddDynamicElement("container", "container name").
-			AddDynamicElement("node", "node name").
-			AddStaticElements("requested", "cpu", "cores"),
-	},
-	plugin.Metric{
-		Namespace: plugin.NewNamespace("grafanalabs", "kubestate", "pod", "container").
-			AddDynamicElement("namespace", "kubernetes namespace").
-			AddDynamicElement("pod", "pod name").
-			AddDynamicElement("container", "container name").
-			AddDynamicElement("node", "node name").
-			AddStaticElements("requested", "memory", "bytes"),
-	},
-	plugin.Metric{
-		Namespace: plugin.NewNamespace("grafanalabs", "kubestate", "pod", "container").
-			AddDynamicElement("namespace", "kubernetes namespace").
-			AddDynamicElement("pod", "pod name").
-			AddDynamicElement("container", "container name").
-			AddDynamicElement("node", "node name").
-			AddStaticElements("limits", "cpu", "cores"),
-	},
-	plugin.Metric{
-		Namespace: plugin.NewNamespace("grafanalabs", "kubestate", "pod", "container").
-			AddDynamicElement("namespace", "kubernetes namespace").
-			AddDynamicElement("pod", "pod name").
-			AddDynamicElement("container", "container name").
-			AddDynamicElement("node", "node name").
-			AddStaticElements("limits", "memory", "bytes"),
-	},
-}
-
 var cases = []struct {
 	pod      v1.Pod
 	metrics  []plugin.Metric
@@ -214,7 +119,7 @@ var cases = []struct {
 }{
 	{
 		pod:     mockPods[0],
-		metrics: podStatusMts,
+		metrics: getPodMetricTypes(),
 		expected: []string{
 			"grafanalabs.kubestate.pod.default.pod1.status.phase.Running.value 1",
 			"grafanalabs.kubestate.pod.default.pod1.status.condition.ready 1",
@@ -223,22 +128,22 @@ var cases = []struct {
 	},
 	{
 		pod:     mockPods[0],
-		metrics: podContainerMts,
+		metrics: getPodContainerMetricTypes(),
 		expected: []string{
 			"grafanalabs.kubestate.pod.container.default.pod1.container1.status.restarts 3",
 			"grafanalabs.kubestate.pod.container.default.pod1.container1.status.ready 1",
 			"grafanalabs.kubestate.pod.container.default.pod1.container1.status.waiting 0",
 			"grafanalabs.kubestate.pod.container.default.pod1.container1.status.running 1",
 			"grafanalabs.kubestate.pod.container.default.pod1.container1.status.terminated 0",
-			"grafanalabs.kubestate.pod.container.default.pod1.container1.127_0_0_1.requested.cpu.cores 0.1",
-			"grafanalabs.kubestate.pod.container.default.pod1.container1.127_0_0_1.requested.memory.bytes 1e+08",
-			"grafanalabs.kubestate.pod.container.default.pod1.container1.127_0_0_1.limits.cpu.cores 0.2",
-			"grafanalabs.kubestate.pod.container.default.pod1.container1.127_0_0_1.limits.memory.bytes 2e+08",
+			"grafanalabs.kubestate.pod.container.default.127_0_0_1.pod1.container1.requested.cpu.cores 0.1",
+			"grafanalabs.kubestate.pod.container.default.127_0_0_1.pod1.container1.requested.memory.bytes 1e+08",
+			"grafanalabs.kubestate.pod.container.default.127_0_0_1.pod1.container1.limits.cpu.cores 0.2",
+			"grafanalabs.kubestate.pod.container.default.127_0_0_1.pod1.container1.limits.memory.bytes 2e+08",
 		},
 	},
 	{
 		pod:     mockPods[1],
-		metrics: podContainerMts,
+		metrics: getPodContainerMetricTypes(),
 		expected: []string{
 			"grafanalabs.kubestate.pod.container.kube-system.pod2.container1.status.restarts 3",
 			"grafanalabs.kubestate.pod.container.kube-system.pod2.container2.status.restarts 5",
@@ -250,10 +155,10 @@ var cases = []struct {
 			"grafanalabs.kubestate.pod.container.kube-system.pod2.container2.status.running 0",
 			"grafanalabs.kubestate.pod.container.kube-system.pod2.container1.status.terminated 0",
 			"grafanalabs.kubestate.pod.container.kube-system.pod2.container2.status.terminated 1",
-			"grafanalabs.kubestate.pod.container.kube-system.pod2.container1.node1.limits.cpu.cores 0.2",
-			"grafanalabs.kubestate.pod.container.kube-system.pod2.container2.node1.limits.cpu.cores 0.2",
-			"grafanalabs.kubestate.pod.container.kube-system.pod2.container1.node1.limits.memory.bytes 2e+08",
-			"grafanalabs.kubestate.pod.container.kube-system.pod2.container2.node1.limits.memory.bytes 2e+08",
+			"grafanalabs.kubestate.pod.container.kube-system.node1.pod2.container1.limits.cpu.cores 0.2",
+			"grafanalabs.kubestate.pod.container.kube-system.node1.pod2.container2.limits.cpu.cores 0.2",
+			"grafanalabs.kubestate.pod.container.kube-system.node1.pod2.container1.limits.memory.bytes 2e+08",
+			"grafanalabs.kubestate.pod.container.kube-system.node1.pod2.container2.limits.memory.bytes 2e+08",
 		},
 	},
 }
@@ -261,7 +166,7 @@ var cases = []struct {
 func TestPodCollector(t *testing.T) {
 	Convey("When collecting metrics for pods", t, func() {
 		for _, c := range cases {
-			metrics, err := new(podCollector).CollectPod(c.metrics, c.pod)
+			metrics, err := new(podCollector).Collect(c.metrics, c.pod)
 
 			So(err, ShouldBeNil)
 
