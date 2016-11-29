@@ -77,13 +77,13 @@ Namespace | Description (optional)
 
 Namespace | Description (optional)
 ----------|-----------------------
-/grafanalabs/kubestate/node/[NAMESPACE]/[NODE]/spec/unschedulable | Whether a node can schedule new pods.
-/grafanalabs/kubestate/node/[NAMESPACE]/[NODE]/status/allocatable/cpu/cores | The CPU resources of a node that are available for scheduling.
-/grafanalabs/kubestate/node/[NAMESPACE]/[NODE]/status/allocatable/memory/bytes | The memory resources of a node that are available for scheduling.
-/grafanalabs/kubestate/node/[NAMESPACE]/[NODE]/status/allocatable/pods | The pod resources of a node that are available for scheduling.
-/grafanalabs/kubestate/node/[NAMESPACE]/[NODE]/status/capacity/cpu/cores | The total CPU resources of the node.
-/grafanalabs/kubestate/node/[NAMESPACE]/[NODE]/status/capacity/memory/bytes | The total memory resources of the node.
-/grafanalabs/kubestate/node/[NAMESPACE]/[NODE]/status/capacity/pods | The total pod resources of the node.
+/grafanalabs/kubestate/node/[NODE]/spec/unschedulable | Whether a node can schedule new pods.
+/grafanalabs/kubestate/node/[NODE]/status/allocatable/cpu/cores | The CPU resources of a node that are available for scheduling.
+/grafanalabs/kubestate/node/[NODE]/status/allocatable/memory/bytes | The memory resources of a node that are available for scheduling.
+/grafanalabs/kubestate/node/[NODE]/status/allocatable/pods | The pod resources of a node that are available for scheduling.
+/grafanalabs/kubestate/node/[NODE]/status/capacity/cpu/cores | The total CPU resources of the node.
+/grafanalabs/kubestate/node/[NODE]/status/capacity/memory/bytes | The total memory resources of the node.
+/grafanalabs/kubestate/node/[NODE]/status/capacity/pods | The total pod resources of the node.
 
 
 ### Examples
