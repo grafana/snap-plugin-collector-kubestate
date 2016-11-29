@@ -138,7 +138,7 @@ func createContainerResourcesMetric(mt plugin.Metric, ns []string, pod v1.Pod, c
 
 func getPodCondition(conditions []v1.PodCondition, t v1.PodConditionType) bool {
 	for _, c := range conditions {
-		if c.Type == t {
+		if c.Type == t && c.Status == v1.ConditionTrue {
 			return true
 		}
 	}

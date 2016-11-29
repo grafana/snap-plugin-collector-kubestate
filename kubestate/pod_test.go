@@ -22,10 +22,12 @@ var mockPods = []v1.Pod{
 			Phase: "Running",
 			Conditions: []v1.PodCondition{
 				v1.PodCondition{
-					Type: v1.PodReady,
+					Type:   v1.PodReady,
+					Status: v1.ConditionTrue,
 				},
 				v1.PodCondition{
-					Type: v1.PodScheduled,
+					Type:   v1.PodScheduled,
+					Status: v1.ConditionTrue,
 				},
 			},
 			ContainerStatuses: []v1.ContainerStatus{
