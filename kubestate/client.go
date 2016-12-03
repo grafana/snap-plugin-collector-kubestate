@@ -6,6 +6,7 @@ import (
 	. "github.com/intelsdi-x/snap-plugin-utilities/logger"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/pkg/api/v1"
+	"k8s.io/client-go/pkg/apis/extensions/v1beta1"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 )
@@ -54,4 +55,8 @@ func (c *Client) GetPods() (*v1.PodList, error) {
 
 func (c *Client) GetNodes() (*v1.NodeList, error) {
 	return c.clientset.Core().Nodes().List(v1.ListOptions{})
+}
+
+func (c *Client) GetDeployments() (*v1beta1.DeploymentList, error) {
+	return c.clientset.Extensions().Deployments("").List(v1.ListOptions{})
 }

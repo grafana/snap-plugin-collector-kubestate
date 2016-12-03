@@ -85,14 +85,18 @@ Namespace | Description (optional)
 /grafanalabs/kubestate/node/[NODE]/status/capacity/memory/bytes | The total memory resources of the node.
 /grafanalabs/kubestate/node/[NODE]/status/capacity/pods | The total pod resources of the node.
 
+#### Deployments
+
+Namespace | Description (optional)
+----------|-----------------------
+/grafanalabs/kubestate/deployment/[NAMESPACE]/[DEPLOYMENT]/metadata/generation | The desired generation sequence number for deployment. If a deployment succeeds should be the same as the observed generation.
+/grafanalabs/kubestate/deployment/[NAMESPACE]/[DEPLOYMENT]/status/observedgeneration | The generation sequence number after deployment.
 
 ### Examples
 
 ### Roadmap
 
-1. Pod metrics
-2. Node metrics
-3. Deployment metrics
+1. Deployment metrics
 
 ## Community Support
 
