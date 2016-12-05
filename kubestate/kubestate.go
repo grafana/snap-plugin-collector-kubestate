@@ -281,6 +281,54 @@ func getDeploymentMetricTypes() []plugin.Metric {
 		Version: 1,
 	})
 
+	mts = append(mts, plugin.Metric{
+		Namespace: plugin.NewNamespace("grafanalabs", "kubestate", "deployment").
+			AddDynamicElement("namespace", "Kubernetes namespace").
+			AddDynamicElement("deployment", "deployment name").
+			AddStaticElements("status", "targetedreplicas"),
+		Version: 1,
+	})
+
+	mts = append(mts, plugin.Metric{
+		Namespace: plugin.NewNamespace("grafanalabs", "kubestate", "deployment").
+			AddDynamicElement("namespace", "Kubernetes namespace").
+			AddDynamicElement("deployment", "deployment name").
+			AddStaticElements("status", "availablereplicas"),
+		Version: 1,
+	})
+
+	mts = append(mts, plugin.Metric{
+		Namespace: plugin.NewNamespace("grafanalabs", "kubestate", "deployment").
+			AddDynamicElement("namespace", "Kubernetes namespace").
+			AddDynamicElement("deployment", "deployment name").
+			AddStaticElements("status", "unavailablereplicas"),
+		Version: 1,
+	})
+
+	mts = append(mts, plugin.Metric{
+		Namespace: plugin.NewNamespace("grafanalabs", "kubestate", "deployment").
+			AddDynamicElement("namespace", "Kubernetes namespace").
+			AddDynamicElement("deployment", "deployment name").
+			AddStaticElements("status", "updatedreplicas"),
+		Version: 1,
+	})
+
+	mts = append(mts, plugin.Metric{
+		Namespace: plugin.NewNamespace("grafanalabs", "kubestate", "deployment").
+			AddDynamicElement("namespace", "Kubernetes namespace").
+			AddDynamicElement("deployment", "deployment name").
+			AddStaticElements("spec", "desiredreplicas"),
+		Version: 1,
+	})
+
+	mts = append(mts, plugin.Metric{
+		Namespace: plugin.NewNamespace("grafanalabs", "kubestate", "deployment").
+			AddDynamicElement("namespace", "Kubernetes namespace").
+			AddDynamicElement("deployment", "deployment name").
+			AddStaticElements("spec", "paused"),
+		Version: 1,
+	})
+
 	return mts
 }
 
@@ -290,6 +338,7 @@ func (n *Kubestate) GetMetricTypes(cfg plugin.Config) ([]plugin.Metric, error) {
 	mts = append(mts, getPodMetricTypes()...)
 	mts = append(mts, getPodContainerMetricTypes()...)
 	mts = append(mts, getNodeMetricTypes()...)
+	mts = append(mts, getDeploymentMetricTypes()...)
 
 	return mts, nil
 }

@@ -22,6 +22,24 @@ func (*deploymentCollector) Collect(mts []plugin.Metric, deployment v1beta1.Depl
 		} else if ns[5] == "status" && ns[6] == "observedgeneration" {
 			metric := createDeploymentMetric(mt, ns, deployment, deployment.Status.ObservedGeneration)
 			metrics = append(metrics, metric)
+		} else if ns[5] == "status" && ns[6] == "targetedreplicas" {
+			metric := createDeploymentMetric(mt, ns, deployment, deployment.Status.Replicas)
+			metrics = append(metrics, metric)
+		} else if ns[5] == "status" && ns[6] == "availablereplicas" {
+			metric := createDeploymentMetric(mt, ns, deployment, deployment.Status.AvailableReplicas)
+			metrics = append(metrics, metric)
+		} else if ns[5] == "status" && ns[6] == "unavailablereplicas" {
+			metric := createDeploymentMetric(mt, ns, deployment, deployment.Status.UnavailableReplicas)
+			metrics = append(metrics, metric)
+		} else if ns[5] == "status" && ns[6] == "updatedreplicas" {
+			metric := createDeploymentMetric(mt, ns, deployment, deployment.Status.UpdatedReplicas)
+			metrics = append(metrics, metric)
+		} else if ns[5] == "spec" && ns[6] == "desiredreplicas" && deployment.Spec.Replicas != nil {
+			metric := createDeploymentMetric(mt, ns, deployment, *deployment.Spec.Replicas)
+			metrics = append(metrics, metric)
+		} else if ns[5] == "spec" && ns[6] == "paused" {
+			metric := createDeploymentMetric(mt, ns, deployment, boolInt(deployment.Spec.Paused))
+			metrics = append(metrics, metric)
 		}
 	}
 

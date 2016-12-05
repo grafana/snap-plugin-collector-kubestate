@@ -91,6 +91,9 @@ Namespace | Description (optional)
 ----------|-----------------------
 /grafanalabs/kubestate/deployment/[NAMESPACE]/[DEPLOYMENT]/metadata/generation | The desired generation sequence number for deployment. If a deployment succeeds should be the same as the observed generation.
 /grafanalabs/kubestate/deployment/[NAMESPACE]/[DEPLOYMENT]/status/observedgeneration | The generation sequence number after deployment.
+/grafanalabs/kubestate/deployment/[NAMESPACE]/[DEPLOYMENT]/status/targetedreplicas | Total number of non-terminated pods targeted by this deployment (their labels match the selector).
+/grafanalabs/kubestate/deployment/[NAMESPACE]/[DEPLOYMENT]/status/availablereplicas | Total number of available pods (ready for at least minReadySeconds) targeted by this deployment.
+/grafanalabs/kubestate/deployment/[NAMESPACE]/[DEPLOYMENT]/spec/desiredreplicas | Number of desired pods.
 
 ### Examples
 
