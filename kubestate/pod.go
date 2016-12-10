@@ -10,11 +10,22 @@ import (
 type podCollector struct {
 }
 
+const (
+	minPodNamespaceSize = 8
+)
+
 func (*podCollector) Collect(mts []plugin.Metric, pod v1.Pod) ([]plugin.Metric, error) {
 	metrics := make([]plugin.Metric, 0)
 
 	for _, mt := range mts {
 		ns := mt.Namespace.Strings()
+
+		if len(ns) < minPodNamespaceSize {
+			continue
+		}
+		if !isValidNamespace(ns) {
+			continue
+		}
 
 		if ns[2] == "pod" && ns[5] == "status" {
 			if ns[6] == "phase" {

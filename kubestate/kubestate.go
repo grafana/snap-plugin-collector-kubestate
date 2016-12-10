@@ -5,6 +5,7 @@ import (
 
 	"github.com/intelsdi-x/snap-plugin-lib-go/v1/plugin"
 	. "github.com/intelsdi-x/snap-plugin-utilities/logger"
+	. "github.com/intelsdi-x/snap-plugin-utilities/ns"
 	// "k8s.io/client-go/rest"
 )
 
@@ -72,6 +73,17 @@ func boolInt(b bool) int {
 
 func slugify(name string) string {
 	return strings.Replace(name, ".", "_", -1)
+}
+
+func isValidNamespace(ns []string) bool {
+	for i := range ns {
+		err := ValidateMetricNamespacePart(ns[i])
+		if err != nil {
+			// Logger.
+			return false
+		}
+	}
+	return true
 }
 
 func getPodMetricTypes() []plugin.Metric {

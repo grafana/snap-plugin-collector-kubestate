@@ -10,11 +10,22 @@ import (
 type deploymentCollector struct {
 }
 
+const (
+	minDeploymentNamespaceSize = 7
+)
+
 func (*deploymentCollector) Collect(mts []plugin.Metric, deployment v1beta1.Deployment) ([]plugin.Metric, error) {
 	metrics := make([]plugin.Metric, 0)
 
 	for _, mt := range mts {
 		ns := mt.Namespace.Strings()
+
+		if len(ns) < minDeploymentNamespaceSize {
+			continue
+		}
+		if !isValidNamespace(ns) {
+			continue
+		}
 
 		if ns[5] == "metadata" && ns[6] == "generation" {
 			metric := createDeploymentMetric(mt, ns, deployment, deployment.Generation)

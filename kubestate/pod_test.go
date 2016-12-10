@@ -112,6 +112,17 @@ var mockPods = []v1.Pod{
 	},
 }
 
+var malformedMetricTypes = []plugin.Metric{
+	{
+		Namespace: plugin.NewNamespace("grafanalabs", "kubestate"),
+		Version:   1,
+	},
+	{
+		Namespace: plugin.NewNamespace("grafanalabs", "kubestate", "pod", "container", "test", "test", "status", "metric^1"),
+		Version:   1,
+	},
+}
+
 var cases = []struct {
 	pod      v1.Pod
 	metrics  []plugin.Metric
@@ -160,6 +171,11 @@ var cases = []struct {
 			"grafanalabs.kubestate.pod.container.kube-system.node1.pod2.container1.limits.memory.bytes 2e+08",
 			"grafanalabs.kubestate.pod.container.kube-system.node1.pod2.container2.limits.memory.bytes 2e+08",
 		},
+	},
+	{
+		pod:      mockPods[1],
+		metrics:  malformedMetricTypes,
+		expected: []string{},
 	},
 }
 

@@ -10,11 +10,22 @@ import (
 type nodeCollector struct {
 }
 
+const (
+	minNodeNamespaceSize = 6
+)
+
 func (*nodeCollector) Collect(mts []plugin.Metric, node v1.Node) ([]plugin.Metric, error) {
 	metrics := make([]plugin.Metric, 0)
 
 	for _, mt := range mts {
 		ns := mt.Namespace.Strings()
+
+		if len(ns) < minNodeNamespaceSize {
+			continue
+		}
+		if !isValidNamespace(ns) {
+			continue
+		}
 
 		if ns[4] == "spec" && ns[5] == "unschedulable" {
 			metric := createNodeMetric(mt, ns, node, boolInt(node.Spec.Unschedulable))

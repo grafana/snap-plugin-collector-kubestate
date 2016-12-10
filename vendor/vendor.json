@@ -237,6 +237,18 @@
 			"revisionTime": "2016-06-21T06:55:54Z"
 		},
 		{
+			"checksumSHA1": "SOxZnWh89QekpepghzcJdLGmjkI=",
+			"path": "github.com/intelsdi-x/snap-plugin-utilities/ns",
+			"revision": "3c37e3965f3fc2f24714779d3bae7ba7032b87a9",
+			"revisionTime": "2016-10-15T02:47:35Z"
+		},
+		{
+			"checksumSHA1": "ovMd43ZUMggBOJmVdiJPDB140Ms=",
+			"path": "github.com/intelsdi-x/snap-plugin-utilities/str",
+			"revision": "3c37e3965f3fc2f24714779d3bae7ba7032b87a9",
+			"revisionTime": "2016-10-15T02:47:35Z"
+		},
+		{
 			"checksumSHA1": "SGc5vSs9tXhrGJ5ncymDyMvTg24=",
 			"path": "github.com/jonboulle/clockwork",
 			"revision": "bcac9884e7502bb2b474c0339d889cb981a2f27f",
@@ -271,6 +283,12 @@
 			"path": "github.com/mailru/easyjson/jwriter",
 			"revision": "159cdb893c982e3d1bc6450322fedd514f9c9de3",
 			"revisionTime": "2016-11-03T14:18:12Z"
+		},
+		{
+			"checksumSHA1": "R8z+BOS81hOWgcqymuVWHNta/yc=",
+			"path": "github.com/oleiade/reflections",
+			"revision": "0e86b3c98b2ff33e30c85cfe97d9a63d439fe7eb",
+			"revisionTime": "2016-08-17T07:03:35Z"
 		},
 		{
 			"checksumSHA1": "mhvIMH8oAtOiEyg37zWKmgb+6v4=",

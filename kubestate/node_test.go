@@ -56,6 +56,11 @@ var nodeCases = []struct {
 			"grafanalabs.kubestate.node.127_0_0_1.status.allocatable.pods 555",
 		},
 	},
+	{
+		node:     mockNodes[0],
+		metrics:  malformedMetricTypes,
+		expected: []string{},
+	},
 }
 
 func TestNodeCollector(t *testing.T) {

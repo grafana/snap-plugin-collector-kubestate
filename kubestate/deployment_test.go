@@ -104,6 +104,11 @@ var deploymentCases = []struct {
 			"grafanalabs.kubestate.deployment.default.PausedDeploy.spec.paused 1",
 		},
 	},
+	{
+		deployment: mockDeployments[0],
+		metrics:    malformedMetricTypes,
+		expected:   []string{},
+	},
 }
 
 func TestDeploymentCollector(t *testing.T) {
