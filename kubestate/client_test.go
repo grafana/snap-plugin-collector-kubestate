@@ -8,7 +8,7 @@ import (
 
 func TestClient(t *testing.T) {
 	SkipConvey("When creating client", t, func() {
-		c, err := NewClient(false, "/home/<user>/.kube/config")
+		c, err := newClient(false, "/home/<user>/.kube/config")
 
 		So(err, ShouldBeNil)
 		So(c, ShouldNotBeNil)

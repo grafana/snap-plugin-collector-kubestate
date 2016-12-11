@@ -15,30 +15,45 @@ type Kubestate struct {
 // CollectMetrics collects metrics for testing
 func (n *Kubestate) CollectMetrics(mts []plugin.Metric) ([]plugin.Metric, error) {
 	LogDebug("request to collect metrics", "metric_count", len(mts))
-	metrics := make([]plugin.Metric, 0)
 
-	incluster := true
+	incluster, err := mts[0].Config.GetBool("incluster")
+	if err != nil {
+		LogError("failed to fetch config value incluster.", "error", err)
+		incluster = true
+	}
+
 	kubeconfigpath := ""
+	if !incluster {
+		kubeconfigpath, err = mts[0].Config.GetString("kubeconfigpath")
+		if err != nil {
+			LogError("failed to fetch config value kubeconfigpath.", "error", err)
+			return nil, err
+		}
+	}
 
-	// incluster, err := mts[0].Config.GetBool("incluster")
-	// if err != nil {
-	// 	LogError("failed to fetch config value incluster.", "error", err)
-	// 	incluster = true
-	// }
-
-	// kubeconfigpath, err := mts[0].Config.GetString("kubeconfigpath")
-	// if err != nil {
-	// 	LogError("failed to fetch config value kubeconfigpath.", "error", err)
-	// 	return nil, err
-	// }
-
-	client, err := NewClient(incluster, kubeconfigpath)
+	client, err := newClient(incluster, kubeconfigpath)
 	if err != nil {
 		LogError("failed to create Kubernetes api client.", "error", err)
 		return nil, err
 	}
 
+	metrics, err := collect(client, mts)
+	if err != nil {
+		return nil, err
+	}
+
+	LogDebug("collecting metrics completed", "metric_count", len(metrics))
+	return metrics, nil
+}
+
+var collect = func(client *Client, mts []plugin.Metric) ([]plugin.Metric, error) {
+	metrics := make([]plugin.Metric, 0)
+
 	pods, err := client.GetPods()
+	if err != nil {
+		return nil, err
+	}
+
 	podCollector := new(podCollector)
 	for _, p := range pods.Items {
 		podMetrics, _ := podCollector.Collect(mts, p)
@@ -46,6 +61,10 @@ func (n *Kubestate) CollectMetrics(mts []plugin.Metric) ([]plugin.Metric, error)
 	}
 
 	nodes, err := client.GetNodes()
+	if err != nil {
+		return nil, err
+	}
+
 	nodeCollector := new(nodeCollector)
 	for _, n := range nodes.Items {
 		nodeMetrics, _ := nodeCollector.Collect(mts, n)
@@ -53,13 +72,16 @@ func (n *Kubestate) CollectMetrics(mts []plugin.Metric) ([]plugin.Metric, error)
 	}
 
 	deployments, err := client.GetDeployments()
+	if err != nil {
+		return nil, err
+	}
+
 	deploymentCollector := new(deploymentCollector)
 	for _, d := range deployments.Items {
 		deploymentMetrics, _ := deploymentCollector.Collect(mts, d)
 		metrics = append(metrics, deploymentMetrics...)
 	}
 
-	LogDebug("collecting metrics completed", "metric_count", len(metrics))
 	return metrics, nil
 }
 
@@ -357,7 +379,7 @@ func (n *Kubestate) GetMetricTypes(cfg plugin.Config) ([]plugin.Metric, error) {
 
 func (f *Kubestate) GetConfigPolicy() (plugin.ConfigPolicy, error) {
 	policy := plugin.NewConfigPolicy()
-	policy.AddNewBoolRule([]string{"grafanalabs", "kubestate"}, "incluster", false)
+	policy.AddNewBoolRule([]string{"grafanalabs", "kubestate"}, "incluster", false, plugin.SetDefaultBool(true))
 	policy.AddNewStringRule([]string{"grafanalabs", "kubestate"}, "kubeconfigpath", false)
 	return *policy, nil
 }

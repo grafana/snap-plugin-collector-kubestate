@@ -15,7 +15,7 @@ type Client struct {
 	clientset *kubernetes.Clientset
 }
 
-func NewClient(incluster bool, kubeconfigpath string) (*Client, error) {
+var newClient = func(incluster bool, kubeconfigpath string) (*Client, error) {
 	var config *rest.Config
 	var err error
 
