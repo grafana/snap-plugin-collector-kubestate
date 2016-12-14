@@ -132,7 +132,11 @@ var cases = []struct {
 		pod:     mockPods[0],
 		metrics: getPodMetricTypes(),
 		expected: []string{
-			"grafanalabs.kubestate.pod.default.pod1.status.phase.Running.value 1",
+			"grafanalabs.kubestate.pod.default.pod1.status.phase.Pending 0",
+			"grafanalabs.kubestate.pod.default.pod1.status.phase.Running 1",
+			"grafanalabs.kubestate.pod.default.pod1.status.phase.Succeeded 0",
+			"grafanalabs.kubestate.pod.default.pod1.status.phase.Failed 0",
+			"grafanalabs.kubestate.pod.default.pod1.status.phase.Unknown 0",
 			"grafanalabs.kubestate.pod.default.pod1.status.condition.ready 1",
 			"grafanalabs.kubestate.pod.default.pod1.status.condition.scheduled 1",
 		},

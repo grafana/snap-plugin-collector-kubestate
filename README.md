@@ -102,7 +102,11 @@ Namespace | Description (optional)
 ----------|-----------------------
 /grafanalabs/kubestate/pod/[NAMESPACE]/[POD]/status/condition/ready | specifies if the pod is ready to serve requests
 /grafanalabs/kubestate/pod/[NAMESPACE]/[POD]/status/condition/scheduled | status of the scheduling process for the pod
-/grafanalabs/kubestate/pod/[NAMESPACE]/[POD]/status/phase/[PHASE]/value | Phase can be Pending, Running, Succeeded, Failed, Unknown
+/grafanalabs/kubestate/pod/[NAMESPACE]/[POD]/status/phase/Pending | This includes time before being bound to a node, as well as time spent pulling images onto the host.
+/grafanalabs/kubestate/pod/[NAMESPACE]/[POD]/status/phase/Running | The pod has been bound to a node and all of the containers have been started.
+/grafanalabs/kubestate/pod/[NAMESPACE]/[POD]/status/phase/Succeeded | All containers in the pod have voluntarily terminated with a container exit code of 0, and the system is not going to restart any of these containers.
+/grafanalabs/kubestate/pod/[NAMESPACE]/[POD]/status/phase/Failed |  All containers in the pod have terminated, and at least one container has terminated in a failure.
+/grafanalabs/kubestate/pod/[NAMESPACE]/[POD]/status/phase/Unknown | For some reason the state of the pod could not be obtained, typically due to an error in communicating with the host of the pod.
 /grafanalabs/kubestate/container/[NAMESPACE]/[NODE]/[POD]/[CONTAINER]/limits/cpu/cores | The limit on cpu cores to be used by a container.
 /grafanalabs/kubestate/container/[NAMESPACE]/[NODE]/[POD]/[CONTAINER]/limits/memory/bytes | The limit on memory to be used by a container in bytes.
 /grafanalabs/kubestate/container/[NAMESPACE]/[NODE]/[POD]/[CONTAINER]/requested/cpu/cores | The number of requested cpu cores by a container.

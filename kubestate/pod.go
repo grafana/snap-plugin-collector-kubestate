@@ -41,10 +41,14 @@ func (*podCollector) Collect(mts []plugin.Metric, pod v1.Pod) ([]plugin.Metric, 
 			if ns[podStatusTypeNsPart] == "phase" {
 				ns[namespaceNsPart] = pod.Namespace
 				ns[podNameNsPart] = pod.Name
-				ns[podStatusValueNsPart] = string(pod.Status.Phase)
+
 				mt.Namespace = plugin.NewNamespace(ns...)
 
-				mt.Data = 1
+				if ns[podStatusValueNsPart] == string(pod.Status.Phase) {
+					mt.Data = 1
+				} else {
+					mt.Data = 0
+				}
 
 				mt.Timestamp = time.Now()
 				metrics = append(metrics, mt)
