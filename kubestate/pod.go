@@ -11,7 +11,17 @@ type podCollector struct {
 }
 
 const (
-	minPodNamespaceSize = 8
+	minPodNamespaceSize          = 8
+	metricTypeNsPart             = 2
+	namespaceNsPart              = metricTypeNsPart + 1
+	podNameNsPart                = metricTypeNsPart + 2
+	podStatusNsPart              = metricTypeNsPart + 3
+	podStatusTypeNsPart          = metricTypeNsPart + 4
+	podStatusValueNsPart         = metricTypeNsPart + 5
+	containerStatusNsPart        = metricTypeNsPart + 4
+	containerStatusValueNsPart   = metricTypeNsPart + 5
+	containerResourceNsPart      = metricTypeNsPart + 5
+	containerResourceValueNsPart = metricTypeNsPart + 6
 )
 
 func (*podCollector) Collect(mts []plugin.Metric, pod v1.Pod) ([]plugin.Metric, error) {
@@ -27,74 +37,76 @@ func (*podCollector) Collect(mts []plugin.Metric, pod v1.Pod) ([]plugin.Metric, 
 			continue
 		}
 
-		if ns[2] == "pod" && ns[5] == "status" {
-			if ns[6] == "phase" {
-				ns[3] = pod.Namespace
-				ns[4] = pod.Name
-				ns[7] = string(pod.Status.Phase)
+		if ns[metricTypeNsPart] == "pod" && ns[podStatusNsPart] == "status" {
+			if ns[podStatusTypeNsPart] == "phase" {
+				ns[namespaceNsPart] = pod.Namespace
+				ns[podNameNsPart] = pod.Name
+				ns[podStatusValueNsPart] = string(pod.Status.Phase)
 				mt.Namespace = plugin.NewNamespace(ns...)
 
 				mt.Data = 1
 
 				mt.Timestamp = time.Now()
 				metrics = append(metrics, mt)
-			} else if ns[6] == "condition" {
-				ns[3] = pod.Namespace
-				ns[4] = pod.Name
+			} else if ns[podStatusTypeNsPart] == "condition" {
+				ns[namespaceNsPart] = pod.Namespace
+				ns[podNameNsPart] = pod.Name
 				mt.Namespace = plugin.NewNamespace(ns...)
 
-				if ns[7] == "ready" {
+				if ns[podStatusValueNsPart] == "ready" {
 					mt.Data = boolInt(getPodCondition(pod.Status.Conditions, v1.PodReady))
 				}
-				if ns[7] == "scheduled" {
+				if ns[podStatusValueNsPart] == "scheduled" {
 					mt.Data = boolInt(getPodCondition(pod.Status.Conditions, v1.PodScheduled))
 				}
 
 				mt.Timestamp = time.Now()
 				metrics = append(metrics, mt)
 			}
-		} else if ns[3] == "container" {
-			for _, cs := range pod.Status.ContainerStatuses {
-				switch ns[8] {
-				case "restarts":
-					metric := createContainerStatusMetric(mt, ns, pod, cs, cs.RestartCount)
-					metrics = append(metrics, metric)
+		} else if ns[metricTypeNsPart] == "container" {
+			if ns[containerStatusNsPart] == "status" {
+				for _, cs := range pod.Status.ContainerStatuses {
+					switch ns[containerStatusValueNsPart] {
+					case "restarts":
+						metric := createContainerStatusMetric(mt, ns, pod, cs, cs.RestartCount)
+						metrics = append(metrics, metric)
 
-				case "ready":
-					metric := createContainerStatusMetric(mt, ns, pod, cs, boolInt(cs.Ready))
-					metrics = append(metrics, metric)
+					case "ready":
+						metric := createContainerStatusMetric(mt, ns, pod, cs, boolInt(cs.Ready))
+						metrics = append(metrics, metric)
 
-				case "waiting":
-					metric := createContainerStatusMetric(mt, ns, pod, cs, boolInt(cs.State.Waiting != nil))
-					metrics = append(metrics, metric)
+					case "waiting":
+						metric := createContainerStatusMetric(mt, ns, pod, cs, boolInt(cs.State.Waiting != nil))
+						metrics = append(metrics, metric)
 
-				case "running":
-					metric := createContainerStatusMetric(mt, ns, pod, cs, boolInt(cs.State.Running != nil))
-					metrics = append(metrics, metric)
+					case "running":
+						metric := createContainerStatusMetric(mt, ns, pod, cs, boolInt(cs.State.Running != nil))
+						metrics = append(metrics, metric)
 
-				case "terminated":
-					metric := createContainerStatusMetric(mt, ns, pod, cs, boolInt(cs.State.Terminated != nil))
-					metrics = append(metrics, metric)
+					case "terminated":
+						metric := createContainerStatusMetric(mt, ns, pod, cs, boolInt(cs.State.Terminated != nil))
+						metrics = append(metrics, metric)
+					}
 				}
 			}
 
 			nodeName := pod.Spec.NodeName
 			for _, c := range pod.Spec.Containers {
-				if ns[8] == "requested" && ns[9] == "cpu" {
+				if ns[containerResourceNsPart] == "requested" && ns[containerResourceValueNsPart] == "cpu" {
 					req := c.Resources.Requests
 
 					if cpu, ok := req[v1.ResourceCPU]; ok {
 						metric := createContainerResourcesMetric(mt, ns, pod, c, nodeName, float64(cpu.MilliValue())/1000)
 						metrics = append(metrics, metric)
 					}
-				} else if ns[8] == "requested" && ns[9] == "memory" {
+				} else if ns[containerResourceNsPart] == "requested" && ns[containerResourceValueNsPart] == "memory" {
 					req := c.Resources.Requests
 
 					if mem, ok := req[v1.ResourceMemory]; ok {
 						metric := createContainerResourcesMetric(mt, ns, pod, c, nodeName, float64(mem.Value()))
 						metrics = append(metrics, metric)
 					}
-				} else if ns[8] == "limits" && ns[9] == "cpu" {
+				} else if ns[containerResourceNsPart] == "limits" && ns[containerResourceValueNsPart] == "cpu" {
 					limits := c.Resources.Limits
 
 					if cpu, ok := limits[v1.ResourceCPU]; ok {
@@ -104,7 +116,7 @@ func (*podCollector) Collect(mts []plugin.Metric, pod v1.Pod) ([]plugin.Metric, 
 						metric := createContainerResourcesMetric(mt, ns, pod, c, nodeName, float64(cpu.MilliValue())/1000)
 						metrics = append(metrics, metric)
 					}
-				} else if ns[8] == "limits" && ns[9] == "memory" {
+				} else if ns[containerResourceNsPart] == "limits" && ns[containerResourceValueNsPart] == "memory" {
 					limits := c.Resources.Limits
 
 					if mem, ok := limits[v1.ResourceMemory]; ok {
@@ -123,9 +135,9 @@ func (*podCollector) Collect(mts []plugin.Metric, pod v1.Pod) ([]plugin.Metric, 
 }
 
 func createContainerStatusMetric(mt plugin.Metric, ns []string, pod v1.Pod, cs v1.ContainerStatus, value interface{}) plugin.Metric {
-	ns[4] = pod.Namespace
-	ns[5] = pod.Name
-	ns[6] = cs.Name
+	ns[namespaceNsPart] = pod.Namespace
+	ns[namespaceNsPart+1] = pod.Name
+	ns[namespaceNsPart+2] = cs.Name
 	mt.Namespace = plugin.NewNamespace(ns...)
 
 	mt.Data = value
@@ -135,10 +147,10 @@ func createContainerStatusMetric(mt plugin.Metric, ns []string, pod v1.Pod, cs v
 }
 
 func createContainerResourcesMetric(mt plugin.Metric, ns []string, pod v1.Pod, c v1.Container, nodeName string, value interface{}) plugin.Metric {
-	ns[4] = pod.Namespace
-	ns[5] = slugify(nodeName)
-	ns[6] = pod.Name
-	ns[7] = c.Name
+	ns[namespaceNsPart] = pod.Namespace
+	ns[namespaceNsPart+1] = slugify(nodeName)
+	ns[namespaceNsPart+2] = pod.Name
+	ns[namespaceNsPart+3] = c.Name
 	mt.Namespace = plugin.NewNamespace(ns...)
 
 	mt.Data = value

@@ -146,7 +146,7 @@ func getPodContainerMetricTypes() []plugin.Metric {
 	mts := []plugin.Metric{}
 
 	mts = append(mts, plugin.Metric{
-		Namespace: plugin.NewNamespace("grafanalabs", "kubestate", "pod", "container").
+		Namespace: plugin.NewNamespace("grafanalabs", "kubestate", "container").
 			AddDynamicElement("namespace", "kubernetes namespace").
 			AddDynamicElement("pod", "pod name").
 			AddDynamicElement("container", "container name").
@@ -155,7 +155,7 @@ func getPodContainerMetricTypes() []plugin.Metric {
 	})
 
 	mts = append(mts, plugin.Metric{
-		Namespace: plugin.NewNamespace("grafanalabs", "kubestate", "pod", "container").
+		Namespace: plugin.NewNamespace("grafanalabs", "kubestate", "container").
 			AddDynamicElement("namespace", "kubernetes namespace").
 			AddDynamicElement("pod", "pod name").
 			AddDynamicElement("container", "container name").
@@ -164,7 +164,7 @@ func getPodContainerMetricTypes() []plugin.Metric {
 	})
 
 	mts = append(mts, plugin.Metric{
-		Namespace: plugin.NewNamespace("grafanalabs", "kubestate", "pod", "container").
+		Namespace: plugin.NewNamespace("grafanalabs", "kubestate", "container").
 			AddDynamicElement("namespace", "kubernetes namespace").
 			AddDynamicElement("pod", "pod name").
 			AddDynamicElement("container", "container name").
@@ -173,7 +173,7 @@ func getPodContainerMetricTypes() []plugin.Metric {
 	})
 
 	mts = append(mts, plugin.Metric{
-		Namespace: plugin.NewNamespace("grafanalabs", "kubestate", "pod", "container").
+		Namespace: plugin.NewNamespace("grafanalabs", "kubestate", "container").
 			AddDynamicElement("namespace", "kubernetes namespace").
 			AddDynamicElement("pod", "pod name").
 			AddDynamicElement("container", "container name").
@@ -182,7 +182,7 @@ func getPodContainerMetricTypes() []plugin.Metric {
 	})
 
 	mts = append(mts, plugin.Metric{
-		Namespace: plugin.NewNamespace("grafanalabs", "kubestate", "pod", "container").
+		Namespace: plugin.NewNamespace("grafanalabs", "kubestate", "container").
 			AddDynamicElement("namespace", "kubernetes namespace").
 			AddDynamicElement("pod", "pod name").
 			AddDynamicElement("container", "container name").
@@ -191,7 +191,7 @@ func getPodContainerMetricTypes() []plugin.Metric {
 	})
 
 	mts = append(mts, plugin.Metric{
-		Namespace: plugin.NewNamespace("grafanalabs", "kubestate", "pod", "container").
+		Namespace: plugin.NewNamespace("grafanalabs", "kubestate", "container").
 			AddDynamicElement("namespace", "kubernetes namespace").
 			AddDynamicElement("node", "node name").
 			AddDynamicElement("pod", "pod name").
@@ -201,7 +201,7 @@ func getPodContainerMetricTypes() []plugin.Metric {
 	})
 
 	mts = append(mts, plugin.Metric{
-		Namespace: plugin.NewNamespace("grafanalabs", "kubestate", "pod", "container").
+		Namespace: plugin.NewNamespace("grafanalabs", "kubestate", "container").
 			AddDynamicElement("namespace", "kubernetes namespace").
 			AddDynamicElement("node", "node name").
 			AddDynamicElement("pod", "pod name").
@@ -211,7 +211,7 @@ func getPodContainerMetricTypes() []plugin.Metric {
 	})
 
 	mts = append(mts, plugin.Metric{
-		Namespace: plugin.NewNamespace("grafanalabs", "kubestate", "pod", "container").
+		Namespace: plugin.NewNamespace("grafanalabs", "kubestate", "container").
 			AddDynamicElement("namespace", "kubernetes namespace").
 			AddDynamicElement("node", "node name").
 			AddDynamicElement("pod", "pod name").
@@ -221,7 +221,7 @@ func getPodContainerMetricTypes() []plugin.Metric {
 	})
 
 	mts = append(mts, plugin.Metric{
-		Namespace: plugin.NewNamespace("grafanalabs", "kubestate", "pod", "container").
+		Namespace: plugin.NewNamespace("grafanalabs", "kubestate", "container").
 			AddDynamicElement("namespace", "kubernetes namespace").
 			AddDynamicElement("node", "node name").
 			AddDynamicElement("pod", "pod name").
