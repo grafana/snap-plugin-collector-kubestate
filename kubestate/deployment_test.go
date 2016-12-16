@@ -75,6 +75,7 @@ var deploymentCases = []struct {
 			"grafanalabs.kubestate.deployment.default.BeingDeployed.status.updatedreplicas 2",
 			"grafanalabs.kubestate.deployment.default.BeingDeployed.spec.desiredreplicas 16",
 			"grafanalabs.kubestate.deployment.default.BeingDeployed.spec.paused 0",
+			"grafanalabs.kubestate.deployment.default.BeingDeployed.status.deploynotfinished 1",
 		},
 	},
 	{
@@ -88,6 +89,7 @@ var deploymentCases = []struct {
 			"grafanalabs.kubestate.deployment.default.NoDesiredReplicas.status.unavailablereplicas 0",
 			"grafanalabs.kubestate.deployment.default.NoDesiredReplicas.status.updatedreplicas 0",
 			"grafanalabs.kubestate.deployment.default.NoDesiredReplicas.spec.paused 0",
+			"grafanalabs.kubestate.deployment.default.NoDesiredReplicas.status.deploynotfinished 0",
 		},
 	},
 	{
@@ -102,6 +104,7 @@ var deploymentCases = []struct {
 			"grafanalabs.kubestate.deployment.default.PausedDeploy.status.updatedreplicas 2",
 			"grafanalabs.kubestate.deployment.default.PausedDeploy.spec.desiredreplicas 16",
 			"grafanalabs.kubestate.deployment.default.PausedDeploy.spec.paused 1",
+			"grafanalabs.kubestate.deployment.default.PausedDeploy.status.deploynotfinished 1",
 		},
 	},
 	{

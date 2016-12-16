@@ -51,6 +51,10 @@ func (*deploymentCollector) Collect(mts []plugin.Metric, deployment v1beta1.Depl
 		} else if ns[5] == "spec" && ns[6] == "paused" {
 			metric := createDeploymentMetric(mt, ns, deployment, boolInt(deployment.Spec.Paused))
 			metrics = append(metrics, metric)
+		} else if ns[5] == "status" && ns[6] == "deploynotfinished" {
+			notFinished := deployment.Generation-deployment.Status.ObservedGeneration > 0
+			metric := createDeploymentMetric(mt, ns, deployment, boolInt(notFinished))
+			metrics = append(metrics, metric)
 		}
 	}
 

@@ -1,4 +1,4 @@
-# snap collector plugin - kube state
+# snap collector plugin - kubestate
 
 This plugin collects metrics from Kubernetes about the state of pods, nodes and deployments.
 
@@ -100,22 +100,22 @@ This plugin has the ability to gather the following metrics:
 
 Namespace | Description (optional)
 ----------|-----------------------
-/grafanalabs/kubestate/pod/[NAMESPACE]/[POD]/status/condition/ready | specifies if the pod is ready to serve requests
-/grafanalabs/kubestate/pod/[NAMESPACE]/[POD]/status/condition/scheduled | status of the scheduling process for the pod
-/grafanalabs/kubestate/pod/[NAMESPACE]/[POD]/status/phase/Pending | This includes time before being bound to a node, as well as time spent pulling images onto the host.
-/grafanalabs/kubestate/pod/[NAMESPACE]/[POD]/status/phase/Running | The pod has been bound to a node and all of the containers have been started.
-/grafanalabs/kubestate/pod/[NAMESPACE]/[POD]/status/phase/Succeeded | All containers in the pod have voluntarily terminated with a container exit code of 0, and the system is not going to restart any of these containers.
-/grafanalabs/kubestate/pod/[NAMESPACE]/[POD]/status/phase/Failed |  All containers in the pod have terminated, and at least one container has terminated in a failure.
-/grafanalabs/kubestate/pod/[NAMESPACE]/[POD]/status/phase/Unknown | For some reason the state of the pod could not be obtained, typically due to an error in communicating with the host of the pod.
+/grafanalabs/kubestate/pod/[NODE]/[NAMESPACE]/[POD]/status/condition/ready | specifies if the pod is ready to serve requests
+/grafanalabs/kubestate/pod/[NODE]/[NAMESPACE]/[POD]/status/condition/scheduled | status of the scheduling process for the pod
+/grafanalabs/kubestate/pod/[NODE]/[NAMESPACE]/[POD]/status/phase/Pending | This includes time before being bound to a node, as well as time spent pulling images onto the host.
+/grafanalabs/kubestate/pod/[NODE]/[NAMESPACE]/[POD]/status/phase/Running | The pod has been bound to a node and all of the containers have been started.
+/grafanalabs/kubestate/pod/[NODE]/[NAMESPACE]/[POD]/status/phase/Succeeded | All containers in the pod have voluntarily terminated with a container exit code of 0, and the system is not going to restart any of these containers.
+/grafanalabs/kubestate/pod/[NODE]/[NAMESPACE]/[POD]/status/phase/Failed |  All containers in the pod have terminated, and at least one container has terminated in a failure.
+/grafanalabs/kubestate/pod/[NODE]/[NAMESPACE]/[POD]/status/phase/Unknown | For some reason the state of the pod could not be obtained, typically due to an error in communicating with the host of the pod.
 /grafanalabs/kubestate/container/[NAMESPACE]/[NODE]/[POD]/[CONTAINER]/limits/cpu/cores | The limit on cpu cores to be used by a container.
 /grafanalabs/kubestate/container/[NAMESPACE]/[NODE]/[POD]/[CONTAINER]/limits/memory/bytes | The limit on memory to be used by a container in bytes.
 /grafanalabs/kubestate/container/[NAMESPACE]/[NODE]/[POD]/[CONTAINER]/requested/cpu/cores | The number of requested cpu cores by a container.
 /grafanalabs/kubestate/container/[NAMESPACE]/[NODE]/[POD]/[CONTAINER]/requested/memory/bytes | The number of requested memory bytes by a container.
-/grafanalabs/kubestate/container/[NAMESPACE]/[POD]/[CONTAINER]/status/ready | specifies whether the container has passed its readiness probe
-/grafanalabs/kubestate/container/[NAMESPACE]/[POD]/[CONTAINER]/status/restarts | number of times the container has been restarted
-/grafanalabs/kubestate/container/[NAMESPACE]/[POD]/[CONTAINER]/status/running | value 1 if container is running else value 0
-/grafanalabs/kubestate/container/[NAMESPACE]/[POD]/[CONTAINER]/status/terminated | value 1 if container is terminated else value 0
-/grafanalabs/kubestate/container/[NAMESPACE]/[POD]/[CONTAINER]/status/waiting | value 1 if container is waiting else value 0
+/grafanalabs/kubestate/container/[NAMESPACE]/[NODE]/[POD]/[CONTAINER]/status/ready | specifies whether the container has passed its readiness probe
+/grafanalabs/kubestate/container/[NAMESPACE]/[NODE]/[POD]/[CONTAINER]/status/restarts | number of times the container has been restarted
+/grafanalabs/kubestate/container/[NAMESPACE]/[NODE]/[POD]/[CONTAINER]/status/running | value 1 if container is running else value 0
+/grafanalabs/kubestate/container/[NAMESPACE]/[NODE]/[POD]/[CONTAINER]/status/terminated | value 1 if container is terminated else value 0
+/grafanalabs/kubestate/container/[NAMESPACE]/[NODE]/[POD]/[CONTAINER]/status/waiting | value 1 if container is waiting else value 0
 
 #### Nodes
 
@@ -139,6 +139,7 @@ Namespace | Description (optional)
 /grafanalabs/kubestate/deployment/[NAMESPACE]/[DEPLOYMENT]/status/availablereplicas | Total number of available pods (ready for at least minReadySeconds) targeted by this deployment.
 /grafanalabs/kubestate/deployment/[NAMESPACE]/[DEPLOYMENT]/status/unavailablereplicas | Total number of unavailable pods targeted by this deployment.
 /grafanalabs/kubestate/deployment/[NAMESPACE]/[DEPLOYMENT]/spec/desiredreplicas | Number of desired pods.
+/grafanalabs/kubestate/deployment/[NAMESPACE]/[DEPLOYMENT]/status/deploynotfinished | If desired and observed generation are not the same, then either an ongoing deploy or a failed deploy.
 
 ### Examples
 

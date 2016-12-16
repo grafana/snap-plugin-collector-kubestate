@@ -14,12 +14,13 @@ const (
 	minPodNamespaceSize          = 8
 	metricTypeNsPart             = 2
 	namespaceNsPart              = metricTypeNsPart + 1
-	podNameNsPart                = metricTypeNsPart + 2
-	podStatusNsPart              = metricTypeNsPart + 3
-	podStatusTypeNsPart          = metricTypeNsPart + 4
-	podStatusValueNsPart         = metricTypeNsPart + 5
-	containerStatusNsPart        = metricTypeNsPart + 4
-	containerStatusValueNsPart   = metricTypeNsPart + 5
+	nodeNsPart                   = metricTypeNsPart + 2
+	podNameNsPart                = metricTypeNsPart + 3
+	podStatusNsPart              = metricTypeNsPart + 4
+	podStatusTypeNsPart          = metricTypeNsPart + 5
+	podStatusValueNsPart         = metricTypeNsPart + 6
+	containerStatusNsPart        = metricTypeNsPart + 5
+	containerStatusValueNsPart   = metricTypeNsPart + 6
 	containerResourceNsPart      = metricTypeNsPart + 5
 	containerResourceValueNsPart = metricTypeNsPart + 6
 )
@@ -40,6 +41,7 @@ func (*podCollector) Collect(mts []plugin.Metric, pod v1.Pod) ([]plugin.Metric, 
 		if ns[metricTypeNsPart] == "pod" && ns[podStatusNsPart] == "status" {
 			if ns[podStatusTypeNsPart] == "phase" {
 				ns[namespaceNsPart] = pod.Namespace
+				ns[nodeNsPart] = slugify(pod.Spec.NodeName)
 				ns[podNameNsPart] = pod.Name
 
 				mt.Namespace = plugin.NewNamespace(ns...)
@@ -54,6 +56,7 @@ func (*podCollector) Collect(mts []plugin.Metric, pod v1.Pod) ([]plugin.Metric, 
 				metrics = append(metrics, mt)
 			} else if ns[podStatusTypeNsPart] == "condition" {
 				ns[namespaceNsPart] = pod.Namespace
+				ns[nodeNsPart] = slugify(pod.Spec.NodeName)
 				ns[podNameNsPart] = pod.Name
 				mt.Namespace = plugin.NewNamespace(ns...)
 
@@ -140,8 +143,9 @@ func (*podCollector) Collect(mts []plugin.Metric, pod v1.Pod) ([]plugin.Metric, 
 
 func createContainerStatusMetric(mt plugin.Metric, ns []string, pod v1.Pod, cs v1.ContainerStatus, value interface{}) plugin.Metric {
 	ns[namespaceNsPart] = pod.Namespace
-	ns[namespaceNsPart+1] = pod.Name
-	ns[namespaceNsPart+2] = cs.Name
+	ns[nodeNsPart] = slugify(pod.Spec.NodeName)
+	ns[nodeNsPart+1] = pod.Name
+	ns[nodeNsPart+2] = cs.Name
 	mt.Namespace = plugin.NewNamespace(ns...)
 
 	mt.Data = value
