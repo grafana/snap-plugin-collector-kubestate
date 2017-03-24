@@ -43,6 +43,23 @@ func TestKubestate(t *testing.T) {
 		So(inclusterSpy, ShouldBeTrue)
 		So(kubeConfigSpy, ShouldEqual, "")
 	})
+
+	Convey("When checking if metrics contain pod metrics", t, func() {
+		shouldCollect := shouldCollectMetricsFor("pod", getDeploymentMetricTypes())
+		So(shouldCollect, ShouldBeFalse)
+
+		shouldCollect = shouldCollectMetricsFor("pod", getPodMetricTypes())
+		So(shouldCollect, ShouldBeTrue)
+
+		shouldCollect = shouldCollectMetricsFor("container", getPodContainerMetricTypes())
+		So(shouldCollect, ShouldBeTrue)
+
+		shouldCollect = shouldCollectMetricsFor("node", getNodeMetricTypes())
+		So(shouldCollect, ShouldBeTrue)
+
+		shouldCollect = shouldCollectMetricsFor("deployment", getDeploymentMetricTypes())
+		So(shouldCollect, ShouldBeTrue)
+	})
 }
 
 var metricWithInclusterConfig = []plugin.Metric{

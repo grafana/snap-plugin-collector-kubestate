@@ -49,40 +49,59 @@ func (n *Kubestate) CollectMetrics(mts []plugin.Metric) ([]plugin.Metric, error)
 var collect = func(client *Client, mts []plugin.Metric) ([]plugin.Metric, error) {
 	metrics := make([]plugin.Metric, 0)
 
-	pods, err := client.GetPods()
-	if err != nil {
-		return nil, err
+	if shouldCollectMetricsFor("pod", mts) || shouldCollectMetricsFor("container", mts) {
+		pods, err := client.GetPods()
+		if err != nil {
+			return nil, err
+		}
+
+		podCollector := new(podCollector)
+		for _, p := range pods.Items {
+			podMetrics, _ := podCollector.Collect(mts, p)
+			metrics = append(metrics, podMetrics...)
+		}
 	}
 
-	podCollector := new(podCollector)
-	for _, p := range pods.Items {
-		podMetrics, _ := podCollector.Collect(mts, p)
-		metrics = append(metrics, podMetrics...)
+	if shouldCollectMetricsFor("node", mts) {
+		nodes, err := client.GetNodes()
+		if err != nil {
+			return nil, err
+		}
+
+		nodeCollector := new(nodeCollector)
+		for _, n := range nodes.Items {
+			nodeMetrics, _ := nodeCollector.Collect(mts, n)
+			metrics = append(metrics, nodeMetrics...)
+		}
 	}
 
-	nodes, err := client.GetNodes()
-	if err != nil {
-		return nil, err
-	}
+	if shouldCollectMetricsFor("deployment", mts) {
+		deployments, err := client.GetDeployments()
+		if err != nil {
+			return nil, err
+		}
 
-	nodeCollector := new(nodeCollector)
-	for _, n := range nodes.Items {
-		nodeMetrics, _ := nodeCollector.Collect(mts, n)
-		metrics = append(metrics, nodeMetrics...)
-	}
-
-	deployments, err := client.GetDeployments()
-	if err != nil {
-		return nil, err
-	}
-
-	deploymentCollector := new(deploymentCollector)
-	for _, d := range deployments.Items {
-		deploymentMetrics, _ := deploymentCollector.Collect(mts, d)
-		metrics = append(metrics, deploymentMetrics...)
+		deploymentCollector := new(deploymentCollector)
+		for _, d := range deployments.Items {
+			deploymentMetrics, _ := deploymentCollector.Collect(mts, d)
+			metrics = append(metrics, deploymentMetrics...)
+		}
 	}
 
 	return metrics, nil
+}
+
+func shouldCollectMetricsFor(metricType string, mts []plugin.Metric) bool {
+	for _, mt := range mts {
+		ns := mt.Namespace.Strings()
+		if len(ns) < 3 {
+			continue
+		}
+		if ns[2] == metricType {
+			return true
+		}
+	}
+	return false
 }
 
 func boolInt(b bool) int {
