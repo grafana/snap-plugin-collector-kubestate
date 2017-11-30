@@ -149,6 +149,41 @@ func (c *ConfigPolicy) AddNewStringRule(ns []string, key string, req bool, opts 
 	return nil
 }
 
+// getDefaults returns config with defaults from config policy
+func (c *ConfigPolicy) getDefaults() Config {
+	config := NewConfig()
+	for _, v := range c.stringRules {
+		for key, val := range v.Rules {
+			if val.HasDefault {
+				config[key] = val.Default
+			}
+		}
+	}
+	for _, v := range c.boolRules {
+		for key, val := range v.Rules {
+			if val.HasDefault {
+				config[key] = val.Default
+			}
+		}
+	}
+	for _, v := range c.floatRules {
+		for key, val := range v.Rules {
+			if val.HasDefault {
+				config[key] = val.Default
+			}
+		}
+	}
+	for _, v := range c.integerRules {
+		for key, val := range v.Rules {
+			if val.HasDefault {
+				config[key] = val.Default
+			}
+		}
+	}
+
+	return config
+}
+
 func newGetConfigPolicyReply(cfg ConfigPolicy) *rpc.GetConfigPolicyReply {
 	return &rpc.GetConfigPolicyReply{
 		BoolPolicy:    cfg.boolRules,

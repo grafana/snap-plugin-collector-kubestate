@@ -38,12 +38,12 @@ This plugin and the above Docker image are used to collect metrics for the [Graf
 
 #### Download kubestate plugin binary:
 
-You can get the pre-built binaries at [GitHub Releases](https://github.com/raintank/snap-plugin-collector-kubestate/releases) page.
+You can get the pre-built binaries at [GitHub Releases](https://github.com/raintgrafanaank/snap-plugin-collector-kubestate/releases) page.
 
 #### To build the plugin binary:
 
-Fork https://github.com/raintank/snap-plugin-collector-kubestate
-Clone repo into `$GOPATH/src/github.com/raintank/`:
+Fork https://github.com/grafana/snap-plugin-collector-kubestate
+Clone repo into `$GOPATH/src/github.com/grafana/`:
 
 ```
 $ git clone https://github.com/<yourGithubID>/snap-plugin-collector-kubestate.git

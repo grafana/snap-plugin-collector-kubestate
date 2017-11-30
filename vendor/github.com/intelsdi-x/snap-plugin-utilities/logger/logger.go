@@ -20,14 +20,13 @@ limitations under the License.
 package logger
 
 import (
-	"fmt"
 	"os"
 	"path/filepath"
 	"runtime"
 	"strings"
 	"time"
 
-	log "github.com/Sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 )
 
 type Fields map[string]interface{}
@@ -48,7 +47,8 @@ func init() {
 	if logFile == nil {
 		logFile, err = os.OpenFile(fname, os.O_APPEND|os.O_CREATE|os.O_RDWR, 0666)
 		if err != nil {
-			fmt.Println("Logging to stderr")
+			// writing non-JSON to stdout is forbidden in Snap plugin init
+			os.Stderr.WriteString("Logging to stderr")
 		}
 	}
 

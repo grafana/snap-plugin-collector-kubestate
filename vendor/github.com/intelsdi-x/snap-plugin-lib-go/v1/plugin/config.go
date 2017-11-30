@@ -23,6 +23,11 @@ package plugin
 // helper functions Get{String,Bool,Float,Int} to be defined.
 type Config map[string]interface{}
 
+// NewConfig returns initialized Config
+func NewConfig() Config {
+	return make(map[string]interface{})
+}
+
 // GetString takes a given key and checks the config for both
 // that the key exists, and that it is of type string.
 // Returns an error if either of these is false.
@@ -103,4 +108,14 @@ func (c Config) GetInt(key string) (int64, error) {
 	}
 
 	return iout, nil
+}
+
+// applyDefaults updates config with defaults from config policy
+func (c Config) applyDefaults(cp ConfigPolicy) {
+	for key, val := range cp.getDefaults() {
+		if _, exist := c[key]; !exist {
+			// set default cfg retrieve from config policy
+			c[key] = val
+		}
+	}
 }

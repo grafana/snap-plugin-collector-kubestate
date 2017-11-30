@@ -42,8 +42,8 @@ func (p *publisherProxy) Publish(ctx context.Context, arg *rpc.PubProcArg) (*rpc
 	cfg := fromProtoConfig(arg.Config)
 	err := p.plugin.Publish(metrics, cfg)
 	if err != nil {
-		return &rpc.ErrReply{}, err
-	} else {
-		return &rpc.ErrReply{}, nil
+		return &rpc.ErrReply{Error: err.Error()}, nil
 	}
+	return &rpc.ErrReply{}, nil
+
 }

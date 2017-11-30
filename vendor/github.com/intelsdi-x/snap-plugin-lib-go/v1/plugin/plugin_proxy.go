@@ -33,11 +33,16 @@ import (
 
 var (
 	// Timeout settings
-	// How much time must elapse before a lack of Ping results in a timeout
-	PingTimeoutDurationDefault = time.Millisecond * 1500
-	// How many successive PingTimeouts must occur to equal a failure.
+
+	// PingTimeoutLimit is the number of successively missed ping health
+	// checks which must occur before the plugin is stopped
 	PingTimeoutLimit = 3
+	// PingTimeoutDuration is the duration during which a ping healthcheck
+	// should be received
+	PingTimeoutDuration = 3 * time.Second
 )
+
+type pluginProxyConstructor func(Plugin) *pluginProxy
 
 type pluginProxy struct {
 	plugin              Plugin
@@ -46,10 +51,21 @@ type pluginProxy struct {
 	halt                chan struct{}
 }
 
+// pluginProxyCtor refers to function creating a new plugin proxy instance,
+// should never be exposed or used outside of tests
+var pluginProxyCtor pluginProxyConstructor = defaultPluginProxyCtor
+
+// newPluginProxy delivers a new plugin proxy instance using a constructor
 func newPluginProxy(plugin Plugin) *pluginProxy {
+	return pluginProxyCtor(plugin)
+}
+
+// defaultPluginProxyCtor delivers new plugin instance using default setup
+// (e.g.: default plugin timeout)
+func defaultPluginProxyCtor(plugin Plugin) *pluginProxy {
 	return &pluginProxy{
 		plugin:              plugin,
-		PingTimeoutDuration: PingTimeoutDurationDefault,
+		PingTimeoutDuration: PingTimeoutDuration,
 		halt:                make(chan struct{}),
 	}
 }

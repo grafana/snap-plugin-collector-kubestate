@@ -37,7 +37,7 @@ type MetaOpt func(m *meta)
 // ConcurrencyCount is the max number of concurrent calls the plugin
 // should take.  For example:
 // If there are 5 tasks using the plugin and its concurrency count is 2,
-// snapd will keep 3 plugin instances running.
+// snapteld will keep 3 plugin instances running.
 // ConcurrencyCount overwrites the default (5) for a Meta's ConcurrencyCount.
 func ConcurrencyCount(cc int) MetaOpt {
 	return func(m *meta) {
@@ -63,12 +63,19 @@ func RoutingStrategy(r router) MetaOpt {
 	}
 }
 
-// CacheTTL will override the default cache TTL for the this plugin. snapd
+// CacheTTL will override the default cache TTL for the this plugin. snapteld
 // caches metrics on the daemon side for a default of 500ms.
 // CacheTTL overwrites the default (500ms) for a Meta's CacheTTL.
 func CacheTTL(t time.Duration) MetaOpt {
 	return func(m *meta) {
 		m.CacheTTL = t
+	}
+}
+
+// metaRPCType sets the metaRPCType for the meta object. Used only internally.
+func rpcType(typ metaRPCType) MetaOpt {
+	return func(m *meta) {
+		m.RPCType = typ
 	}
 }
 
@@ -78,7 +85,26 @@ const (
 	collectorType pluginType = iota
 	processorType
 	publisherType
+	streamCollectorType
 )
+
+type metaRPCType int
+
+const (
+	gRPC       metaRPCType = 2
+	gRPCStream             = 3
+)
+
+func (t metaRPCType) String() string {
+	switch t {
+	case gRPC:
+		return "gRPC"
+	case gRPCStream:
+		return "streaming gRPC"
+	default:
+		return "unknown"
+	}
+}
 
 // meta is the metadata for a plugin
 type meta struct {
@@ -86,7 +112,7 @@ type meta struct {
 	Type       pluginType
 	Name       string
 	Version    int
-	RPCType    int
+	RPCType    metaRPCType
 	RPCVersion int
 
 	ConcurrencyCount int
@@ -94,18 +120,22 @@ type meta struct {
 	Unsecure         bool
 	CacheTTL         time.Duration
 	RoutingStrategy  router
+	CertPath         string
+	KeyPath          string
+	TLSEnabled       bool
+	RootCertPaths    string
 }
 
 // newMeta sets defaults, applies options, and then returns a meta struct
-func newMeta(plType pluginType, name string, version int, opts ...MetaOpt) meta {
+func newMeta(plType pluginType, name string, version int, opts ...MetaOpt) *meta {
 	p := meta{
 		Name:             name,
 		Version:          version,
 		Type:             plType,
 		ConcurrencyCount: defaultConcurrencyCount,
 		RoutingStrategy:  LRURouter,
-		RPCType:          2, // GRPC type
-		RPCVersion:       1, // This is v1 lib
+		RPCType:          gRPC, // GRPC type
+		RPCVersion:       1,    // This is v1 lib
 		// Unsecure is a legacy value not used for grpc, but needed to avoid
 		// calling SetKey needlessly.
 		Unsecure: true,
@@ -115,5 +145,5 @@ func newMeta(plType pluginType, name string, version int, opts ...MetaOpt) meta 
 		opt(&p)
 	}
 
-	return p
+	return &p
 }
