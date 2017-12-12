@@ -21,6 +21,7 @@ package plugin
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/intelsdi-x/snap-plugin-lib-go/v1/plugin/rpc"
@@ -92,7 +93,7 @@ func toProtoMetric(mt Metric) (*rpc.Metric, error) {
 	case nil:
 		metric.Data = nil
 	default:
-		return nil, fmt.Errorf("unsupported type: %s given in metric data", t)
+		return nil, fmt.Errorf("unsupported type: %v given in metric data", t)
 	}
 	return metric, nil
 }
@@ -266,6 +267,45 @@ func (n Namespace) Element(idx int) NamespaceElement {
 		return n[idx]
 	}
 	return NamespaceElement{}
+}
+
+// String returns the string representation of the namespace with "/" joining
+// the elements of the namespace.  A leading "/" is added.
+func (n Namespace) String() string {
+	ns := n.Strings()
+	s := n.getSeparator()
+	return s + strings.Join(ns, s)
+}
+
+// getSeparator returns the highest suitable separator from the nsPriorityList.
+// Otherwise the core separator is returned.
+func (n Namespace) getSeparator() string {
+	var nsPriorityList = []string{"/", "|", "%", ":", "-", ";", "_", "^", ">", "<", "+", "=", "&", "㊽", "Ä", "大", "小", "ᵹ", "☍", "ヒ"}
+	var Separator = "\U0001f422"
+
+	smap := map[string]bool{}
+
+	for _, s := range nsPriorityList {
+		smap[s] = false
+	}
+
+	for _, e := range n {
+		// look at each char
+		for _, r := range e.Value {
+			ch := fmt.Sprintf("%c", r)
+			if v, ok := smap[ch]; ok && !v {
+				smap[ch] = true
+			}
+		}
+	}
+
+	// Go through our separator list
+	for _, s := range nsPriorityList {
+		if v, ok := smap[s]; ok && !v {
+			return s
+		}
+	}
+	return Separator
 }
 
 // namespaceElement provides meta data related to the namespace.

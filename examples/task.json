@@ -12,18 +12,9 @@
       "config": {
         "/grafanalabs/kubestate": {
           "incluster": false,
-          "kubeconfigpath": "/home/daniel/.kube/config"
+          "kubeconfigpath": "/home/jtlisi/.kube/config"
         }
-      },
-      "process": null,
-      "publish": [
-        {
-          "plugin_name": "file",
-          "config": {
-            "file": "/tmp/snap_published_grpc_file.log"
-          }
-        }
-      ]
+      }
     }
   }
 }

@@ -6,7 +6,6 @@ import (
 	"github.com/intelsdi-x/snap-plugin-lib-go/v1/plugin"
 	. "github.com/intelsdi-x/snap-plugin-utilities/logger"
 	. "github.com/intelsdi-x/snap-plugin-utilities/ns"
-	// "k8s.io/client-go/rest"
 )
 
 type Kubestate struct {
@@ -85,6 +84,19 @@ var collect = func(client *Client, mts []plugin.Metric) ([]plugin.Metric, error)
 		for _, d := range deployments.Items {
 			deploymentMetrics, _ := deploymentCollector.Collect(mts, d)
 			metrics = append(metrics, deploymentMetrics...)
+		}
+	}
+
+	if shouldCollectMetricsFor("job", mts) {
+		jobs, err := client.GetJobs()
+		if err != nil {
+			return nil, err
+		}
+
+		jobCollector := new(jobCollector)
+		for _, d := range jobs.Items {
+			jobMetrics, _ := jobCollector.Collect(mts, d)
+			metrics = append(metrics, jobMetrics...)
 		}
 	}
 
@@ -192,6 +204,36 @@ func getPodMetricTypes() []plugin.Metric {
 			AddDynamicElement("pod", "pod name").
 			AddStaticElement("status").
 			AddStaticElements("condition", "scheduled"),
+		Version: 1,
+	})
+
+	return mts
+}
+
+func getJobMetricTypes() []plugin.Metric {
+	mts := []plugin.Metric{}
+	// Job metrics
+	mts = append(mts, plugin.Metric{
+		Namespace: plugin.NewNamespace("grafanalabs", "kubestate", "job").
+			AddDynamicElement("namespace", "kubernetes namespace").
+			AddDynamicElement("job", "job name").
+			AddStaticElements("status", "active"),
+		Version: 1,
+	})
+
+	mts = append(mts, plugin.Metric{
+		Namespace: plugin.NewNamespace("grafanalabs", "kubestate", "job").
+			AddDynamicElement("namespace", "kubernetes namespace").
+			AddDynamicElement("job", "job name").
+			AddStaticElements("status", "succeeded"),
+		Version: 1,
+	})
+
+	mts = append(mts, plugin.Metric{
+		Namespace: plugin.NewNamespace("grafanalabs", "kubestate", "job").
+			AddDynamicElement("namespace", "kubernetes namespace").
+			AddDynamicElement("job", "job name").
+			AddStaticElements("status", "failed"),
 		Version: 1,
 	})
 
@@ -442,6 +484,7 @@ func (n *Kubestate) GetMetricTypes(cfg plugin.Config) ([]plugin.Metric, error) {
 	mts = append(mts, getPodContainerMetricTypes()...)
 	mts = append(mts, getNodeMetricTypes()...)
 	mts = append(mts, getDeploymentMetricTypes()...)
+	mts = append(mts, getJobMetricTypes()...)
 
 	return mts, nil
 }

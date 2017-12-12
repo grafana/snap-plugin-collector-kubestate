@@ -6,6 +6,7 @@ import (
 	. "github.com/intelsdi-x/snap-plugin-utilities/logger"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/pkg/api/v1"
+	v1batch "k8s.io/client-go/pkg/apis/batch/v1"
 	"k8s.io/client-go/pkg/apis/extensions/v1beta1"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
@@ -59,4 +60,8 @@ func (c *Client) GetNodes() (*v1.NodeList, error) {
 
 func (c *Client) GetDeployments() (*v1beta1.DeploymentList, error) {
 	return c.clientset.Extensions().Deployments("").List(v1.ListOptions{})
+}
+
+func (c *Client) GetJobs() (*v1batch.JobList, error) {
+	return c.clientset.BatchClient.Jobs("").List(v1.ListOptions{})
 }
