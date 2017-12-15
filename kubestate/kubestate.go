@@ -45,75 +45,143 @@ func (n *Kubestate) CollectMetrics(mts []plugin.Metric) ([]plugin.Metric, error)
 	return metrics, nil
 }
 
+type MetricScope struct {
+	Resource  string
+	Node      string
+	Namespace string
+}
+
 var collect = func(client *Client, mts []plugin.Metric) ([]plugin.Metric, error) {
 	metrics := make([]plugin.Metric, 0)
 
-	if shouldCollectMetricsFor("pod", mts) || shouldCollectMetricsFor("container", mts) {
-		pods, err := client.GetPods()
-		if err != nil {
-			return nil, err
-		}
-
-		podCollector := new(podCollector)
-		for _, p := range pods.Items {
-			podMetrics, _ := podCollector.Collect(mts, p)
-			metrics = append(metrics, podMetrics...)
-		}
-	}
-
-	if shouldCollectMetricsFor("node", mts) {
-		nodes, err := client.GetNodes()
-		if err != nil {
-			return nil, err
-		}
-
-		nodeCollector := new(nodeCollector)
-		for _, n := range nodes.Items {
-			nodeMetrics, _ := nodeCollector.Collect(mts, n)
-			metrics = append(metrics, nodeMetrics...)
-		}
-	}
-
-	if shouldCollectMetricsFor("deployment", mts) {
-		deployments, err := client.GetDeployments()
-		if err != nil {
-			return nil, err
-		}
-
-		deploymentCollector := new(deploymentCollector)
-		for _, d := range deployments.Items {
-			deploymentMetrics, _ := deploymentCollector.Collect(mts, d)
-			metrics = append(metrics, deploymentMetrics...)
-		}
-	}
-
-	if shouldCollectMetricsFor("job", mts) {
-		jobs, err := client.GetJobs()
-		if err != nil {
-			return nil, err
-		}
-
-		jobCollector := new(jobCollector)
-		for _, d := range jobs.Items {
-			jobMetrics, _ := jobCollector.Collect(mts, d)
-			metrics = append(metrics, jobMetrics...)
-		}
-	}
-
-	return metrics, nil
-}
-
-func shouldCollectMetricsFor(metricType string, mts []plugin.Metric) bool {
+	// group the request metrics by resource, namespace and node
+	//
+	//       grafanalabs.kubestate.pod.<namespace>.<node>
+	//       grafanalabs.kubestate.container.<namespace>.<node>
+	//       grafanalabs.kubestate.deployment.<namespace>
+	//       grafanalabs.kubestate.job.<namespace>
+	//       grafanalabs.kubestate.node.<node>
+	//
+	groupedMts := make(map[MetricScope][]plugin.Metric)
 	for _, mt := range mts {
 		ns := mt.Namespace.Strings()
 		if len(ns) < 3 {
 			continue
 		}
-		if ns[2] == metricType {
-			return true
+		switch ns[2] {
+		case "pod":
+			namespace := "*"
+			node := "*"
+			if len(ns) >= 4 {
+				namespace = ns[4]
+			}
+			if len(ns) >= 5 {
+				node = ns[5]
+			}
+			scope := MetricScope{
+				Resource:  "pod/container",
+				Namespace: namespace,
+				Node:      node,
+			}
+			groupedMts[scope] = append(groupedMts[scope], mt)
+		case "container":
+			namespace := "*"
+			node := "*"
+			if len(ns) >= 4 {
+				namespace = ns[4]
+			}
+			if len(ns) >= 5 {
+				node = ns[5]
+			}
+			scope := MetricScope{
+				Resource:  "pod/container",
+				Namespace: namespace,
+				Node:      node,
+			}
+			groupedMts[scope] = append(groupedMts[scope], mt)
+		case "deployment":
+			namespace := "*"
+			if len(ns) >= 4 {
+				namespace = ns[4]
+			}
+			scope := MetricScope{
+				Resource:  "deployment",
+				Namespace: namespace,
+			}
+			groupedMts[scope] = append(groupedMts[scope], mt)
+		case "job":
+			namespace := "*"
+			if len(ns) >= 4 {
+				namespace = ns[4]
+			}
+			scope := MetricScope{
+				Resource:  "job",
+				Namespace: namespace,
+			}
+			groupedMts[scope] = append(groupedMts[scope], mt)
+		case "node":
+			node := "*"
+			if len(ns) >= 4 {
+				node = ns[4]
+			}
+			scope := MetricScope{
+				Resource: "node",
+				Node:     node,
+			}
+			groupedMts[scope] = append(groupedMts[scope], mt)
 		}
 	}
-	return false
+
+	for scope, scopedMts := range groupedMts {
+		switch scope.Resource {
+		case "pod/container":
+			pods, err := client.GetPods(scope.Namespace, scope.Node)
+			if err != nil {
+				return nil, err
+			}
+
+			podCollector := new(podCollector)
+			for _, p := range pods.Items {
+				podMetrics, _ := podCollector.Collect(scopedMts, p)
+				metrics = append(metrics, podMetrics...)
+			}
+		case "deployment":
+			deployments, err := client.GetDeployments(scope.Namespace)
+			if err != nil {
+				return nil, err
+			}
+
+			deploymentCollector := new(deploymentCollector)
+			for _, d := range deployments.Items {
+				deploymentMetrics, _ := deploymentCollector.Collect(scopedMts, d)
+				metrics = append(metrics, deploymentMetrics...)
+			}
+		case "job":
+			jobs, err := client.GetJobs(scope.Namespace)
+			if err != nil {
+				return nil, err
+			}
+
+			jobCollector := new(jobCollector)
+			for _, d := range jobs.Items {
+				jobMetrics, _ := jobCollector.Collect(scopedMts, d)
+				metrics = append(metrics, jobMetrics...)
+			}
+		case "node":
+			nodes, err := client.GetNodes(scope.Node)
+			if err != nil {
+				return nil, err
+			}
+
+			nodeCollector := new(nodeCollector)
+			for _, n := range nodes.Items {
+				nodeMetrics, _ := nodeCollector.Collect(scopedMts, n)
+				metrics = append(metrics, nodeMetrics...)
+			}
+		}
+	}
+
+	return metrics, nil
 }
 
 func boolInt(b bool) int {
