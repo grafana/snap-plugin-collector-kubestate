@@ -2,7 +2,7 @@
 
 This plugin collects metrics from Kubernetes about the state of pods, nodes and deployments.
 
-It's used in the [snap framework](http://github.com:intelsdi-x/snap).
+It's used in the [snap framework](http://github.com/intelsdi-x/snap).
 
 1. [Getting Started](#getting-started)
   * [System Requirements](#system-requirements)
